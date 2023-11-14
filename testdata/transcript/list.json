@@ -1,0 +1,27 @@
+{
+  "page_details": {
+    "limit": 2,
+    "result_count": 2,
+    "current_url": "https://api.assemblyai.com/v2/transcript?limit=2",
+    "prev_url": "https://api.assemblyai.com/v2/transcript?limit=2&before_id=TRANSCRIPT_ID_2",
+    "next_url": "https://api.assemblyai.com/v2/transcript?limit=2&after_id=TRANSCRIPT_ID_1"
+  },
+  "transcripts": [
+    {
+      "id": "TRANSCRIPT_ID_1",
+      "resource_url": "https://api.assemblyai.com/v2/transcript/TRANSCRIPT_ID_1",
+      "status": "completed",
+      "created": "2023-09-04T17:02:23.506984",
+      "completed": "2023-09-04T17:03:02.678334",
+      "audio_url": "http://deleted_by_user"
+    },
+    {
+      "id": "TRANSCRIPT_ID_2",
+      "resource_url": "https://api.assemblyai.com/v2/transcript/TRANSCRIPT_ID_2",
+      "status": "completed",
+      "created": "2023-09-04T17:02:23.504615",
+      "completed": "2023-09-04T17:03:00.296060",
+      "audio_url": "http://deleted_by_user"
+    }
+  ]
+}
