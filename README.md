@@ -1,4 +1,4 @@
-<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/main/assemblyai.png?raw=true" width="500"/>
+<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/master/assemblyai.png?raw=true" width="500"/>
 
 ---
 
@@ -7,6 +7,8 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/AssemblyAI/assemblyai-go-sdk.svg)](https://pkg.go.dev/github.com/AssemblyAI/assemblyai-go-sdk)
 [![AssemblyAI Twitter](https://img.shields.io/twitter/follow/AssemblyAI?label=%40AssemblyAI&style=social)](https://twitter.com/AssemblyAI)
 [![AssemblyAI YouTube](https://img.shields.io/youtube/channel/subscribers/UCtatfZMf-8EkIwASXM4ts0A)](https://www.youtube.com/@AssemblyAI)
+[![Discord](https://img.shields.io/discord/875120158014853141?logo=discord&label=Discord&link=https%3A%2F%2Fdiscord.com%2Fchannels%2F875120158014853141&style=social)
+](https://assemblyai.com/discord)
 
 # AssemblyAI Go SDK
 
@@ -14,15 +16,15 @@ A Go client library for accessing [AssemblyAI](https://assemblyai.com).
 
 ## Overview
 
-- [AssemblyAI's Go SDK](#assemblyai-go-sdk)
-- [Overview](#overview)
-- [Documentation](#documentation)
-- [Quick Start](#quick-start)
-  - [Installation](#installation)
-  - [Examples](#examples)
-    - [Core Transcription](#core-transcription)
-    - [Audio Intelligence](#audio-intelligence)
-    - [Real-Time Transcription](#real-time-transcription)
+- [AssemblyAI Go SDK](#assemblyai-go-sdk)
+  - [Overview](#overview)
+  - [Documentation](#documentation)
+  - [Quickstart](#quickstart)
+    - [Installation](#installation)
+    - [Examples](#examples)
+      - [Core Transcription](#core-transcription)
+      - [Audio Intelligence](#audio-intelligence)
+      - [Real-Time Transcription](#real-time-transcription)
   - [Playgrounds](#playgrounds)
 
 ## Documentation
