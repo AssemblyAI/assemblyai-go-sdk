@@ -1,4 +1,4 @@
-<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/master/assemblyai.png?raw=true" width="500"/>
+<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/main/assemblyai.png?raw=true" width="500"/>
 
 ---
 
