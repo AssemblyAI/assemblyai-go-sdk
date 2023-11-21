@@ -247,6 +247,10 @@ type LeMURBaseParameters struct {
 
 	FinalModel LeMURModel `json:"final_model,omitempty"`
 
+	// Custom formatted transcript data. Maximum size is the context limit of the selected model, which defaults to 100000.
+	// Use either transcript_ids or input_text as input into LeMUR.
+	InputText *string `json:"input_text,omitempty"`
+
 	// Max output size in tokens, up to 4000
 	MaxOutputSize *int64 `json:"max_output_size,omitempty"`
 
@@ -255,7 +259,8 @@ type LeMURBaseParameters struct {
 	// Can be any value between 0.0 and 1.0 inclusive.
 	Temperature *float64 `json:"temperature,omitempty"`
 
-	// A list of completed transcripts with text. Up to 100 files max, or 100 hours max. Whichever is lower.
+	// A list of completed transcripts with text. Up to a maximum of 100 files or 100 hours, whichever is lower.
+	// Use either transcript_ids or input_text as input into LeMUR.
 	TranscriptIDs []string `json:"transcript_ids,omitempty"`
 }
 
