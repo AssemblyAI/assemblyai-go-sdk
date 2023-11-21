@@ -31,10 +31,10 @@ func TestTranscripts_Submit(t *testing.T) {
 			t.Errorf("Request body = %v, want = %v", string(b), wantBody)
 		}
 
-		var body CreateTranscriptParameters
+		var body TranscriptParams
 		json.Unmarshal(b, &body)
 
-		want := CreateTranscriptParameters{AudioURL: String(fakeAudioURL)}
+		want := TranscriptParams{AudioURL: String(fakeAudioURL)}
 
 		if !cmp.Equal(body, want) {
 			t.Errorf("Request body = %+v, want = %+v", body, want)
@@ -172,7 +172,7 @@ func TestTranscripts_List(t *testing.T) {
 
 	ctx := context.Background()
 
-	results, err := client.Transcripts.List(ctx, TranscriptListParameters{
+	results, err := client.Transcripts.List(ctx, ListTranscriptParams{
 		Limit: Int64(2),
 	})
 	if err != nil {

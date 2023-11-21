@@ -16,11 +16,11 @@ func TestLeMUR_Summarize(t *testing.T) {
 	handler.HandleFunc("/lemur/v3/generate/summary", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 
-		var body LeMURSummaryParameters
+		var body LeMURSummaryParams
 		json.NewDecoder(r.Body).Decode(&body)
 
-		want := LeMURSummaryParameters{
-			LeMURBaseParameters: LeMURBaseParameters{
+		want := LeMURSummaryParams{
+			LeMURBaseParams: LeMURBaseParams{
 				TranscriptIDs: []string{"transcript_id"},
 			},
 		}
@@ -34,8 +34,8 @@ func TestLeMUR_Summarize(t *testing.T) {
 
 	ctx := context.Background()
 
-	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParameters{
-		LeMURBaseParameters: LeMURBaseParameters{
+	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParams{
+		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{"transcript_id"},
 		},
 	})
@@ -57,11 +57,11 @@ func TestLeMUR_QuestionAnswer(t *testing.T) {
 	handler.HandleFunc("/lemur/v3/generate/question-answer", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 
-		var body LeMURQuestionAnswerParameters
+		var body LeMURQuestionAnswerParams
 		json.NewDecoder(r.Body).Decode(&body)
 
-		want := LeMURQuestionAnswerParameters{
-			LeMURBaseParameters: LeMURBaseParameters{
+		want := LeMURQuestionAnswerParams{
+			LeMURBaseParams: LeMURBaseParams{
 				TranscriptIDs: []string{"transcript_id"},
 			},
 			Questions: []LeMURQuestion{
@@ -82,8 +82,8 @@ func TestLeMUR_QuestionAnswer(t *testing.T) {
 		{Question: String("What's causing the wildfires?")},
 	}
 
-	answers, err := client.LeMUR.Question(ctx, LeMURQuestionAnswerParameters{
-		LeMURBaseParameters: LeMURBaseParameters{
+	answers, err := client.LeMUR.Question(ctx, LeMURQuestionAnswerParams{
+		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{"transcript_id"},
 		},
 		Questions: questions,
@@ -111,11 +111,11 @@ func TestLeMUR_ActionItems(t *testing.T) {
 	handler.HandleFunc("/lemur/v3/generate/action-items", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 
-		var body LeMURActionItemsParameters
+		var body LeMURActionItemsParams
 		json.NewDecoder(r.Body).Decode(&body)
 
-		want := LeMURActionItemsParameters{
-			LeMURBaseParameters: LeMURBaseParameters{
+		want := LeMURActionItemsParams{
+			LeMURBaseParams: LeMURBaseParams{
 				TranscriptIDs: []string{"transcript_id"},
 			},
 		}
@@ -129,8 +129,8 @@ func TestLeMUR_ActionItems(t *testing.T) {
 
 	ctx := context.Background()
 
-	response, err := client.LeMUR.ActionItems(ctx, LeMURActionItemsParameters{
-		LeMURBaseParameters: LeMURBaseParameters{
+	response, err := client.LeMUR.ActionItems(ctx, LeMURActionItemsParams{
+		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{"transcript_id"},
 		},
 	})
@@ -158,11 +158,11 @@ then get into the examples with feedback.
 	handler.HandleFunc("/lemur/v3/generate/task", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 
-		var body LeMURTaskParameters
+		var body LeMURTaskParams
 		json.NewDecoder(r.Body).Decode(&body)
 
-		want := LeMURTaskParameters{
-			LeMURBaseParameters: LeMURBaseParameters{
+		want := LeMURTaskParams{
+			LeMURBaseParams: LeMURBaseParams{
 				TranscriptIDs: []string{"transcript_id"},
 			},
 			Prompt: String(prompt),
@@ -177,8 +177,8 @@ then get into the examples with feedback.
 
 	ctx := context.Background()
 
-	response, err := client.LeMUR.Task(ctx, LeMURTaskParameters{
-		LeMURBaseParameters: LeMURBaseParameters{
+	response, err := client.LeMUR.Task(ctx, LeMURTaskParams{
+		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{"transcript_id"},
 		},
 		Prompt: String(prompt),
