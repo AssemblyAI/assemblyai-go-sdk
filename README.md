@@ -1,9 +1,9 @@
-<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/master/assemblyai.png?raw=true" width="500"/>
+<img src="https://github.com/AssemblyAI/assemblyai-go-sdk/blob/main/assemblyai.png?raw=true" width="500"/>
 
 ---
 
-[![CI Passing](https://github.com/AssemblyAI/assemblyai-go-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/AssemblyAI/assemblyai-go-sdk/actions/workflows/test.yml)
-[![GitHub License](https://img.shields.io/github/license/AssemblyAI/assemblyai-go-sdk)](https://github.com/AssemblyAI/assemblyai-go-sdk/blob/master/LICENSE)
+[![CI Passing](https://github.com/AssemblyAI/assemblyai-go-sdk/actions/workflows/go.yml/badge.svg)](https://github.com/AssemblyAI/assemblyai-go-sdk/actions/workflows/go.yml)
+[![GitHub License](https://img.shields.io/github/license/AssemblyAI/assemblyai-go-sdk)](https://github.com/AssemblyAI/assemblyai-go-sdk/blob/main/LICENSE)
 [![Go Reference](https://pkg.go.dev/badge/github.com/AssemblyAI/assemblyai-go-sdk.svg)](https://pkg.go.dev/github.com/AssemblyAI/assemblyai-go-sdk)
 [![AssemblyAI Twitter](https://img.shields.io/twitter/follow/AssemblyAI?label=%40AssemblyAI&style=social)](https://twitter.com/AssemblyAI)
 [![AssemblyAI YouTube](https://img.shields.io/youtube/channel/subscribers/UCtatfZMf-8EkIwASXM4ts0A)](https://www.youtube.com/@AssemblyAI)
@@ -75,7 +75,7 @@ func main() {
 		log.Fatal("Something bad happened:", err)
 	}
 
-	log.Println(transcript.Text)
+	log.Println(*transcript.Text)
 }
 ```
 
@@ -112,7 +112,7 @@ func main() {
 		log.Fatal("Something bad happened:", err)
 	}
 
-	log.Println(transcript.Text)
+	log.Println(*transcript.Text)
 }
 ```
 
@@ -144,7 +144,7 @@ func main() {
 	client := assemblyai.NewClient(apiKey)
 
 	opts := &assemblyai.TranscriptSubmitOptions{
-		EntityDetection: true,
+		EntityDetection: assemblyai.Bool(true),
 	}
 
 	transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, opts)
@@ -153,9 +153,9 @@ func main() {
 	}
 
 	for _, entity := range transcript.Entities {
-		log.Println(entity.Text)
-		log.Println(entity.Type)
-		log.Printf("Timestamp: %v - %v", entity.Start, entity.End)
+		log.Println(*entity.Text)
+		log.Println(*entity.Type)
+		log.Printf("Timestamp: %v - %v", *entity.Start, *entity.End)
 	}
 }
 ```

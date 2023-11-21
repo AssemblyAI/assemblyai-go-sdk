@@ -1,6 +1,6 @@
 module github.com/AssemblyAI/assemblyai-go-sdk
 
-go 1.16
+go 1.18
 
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
