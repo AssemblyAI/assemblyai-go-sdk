@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install PortAudio
-        run: sudo apt-get install -y libasound-dev libportaudio2
+        run: sudo apt-get install -y portaudio19-dev
 
       - name: Set up Go
         uses: actions/setup-go@v4
