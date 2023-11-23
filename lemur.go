@@ -12,7 +12,7 @@ type LeMURService struct {
 // Question returns answers to free-form questions about one or more transcripts.
 //
 // https://www.assemblyai.com/docs/Models/lemur#question--answer
-func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerParameters) (LeMURQuestionAnswerResponse, error) {
+func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerParams) (LeMURQuestionAnswerResponse, error) {
 	var response LeMURQuestionAnswerResponse
 
 	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/question-answer", params)
@@ -30,7 +30,7 @@ func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerP
 // Summarize returns a custom summary of a set of transcripts.
 //
 // https://www.assemblyai.com/docs/Models/lemur#action-items
-func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParameters) (LeMURSummaryResponse, error) {
+func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParams) (LeMURSummaryResponse, error) {
 	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/summary", params)
 	if err != nil {
 		return LeMURSummaryResponse{}, err
@@ -48,7 +48,7 @@ func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParamet
 // ActionItems returns a set of action items based on a set of transcripts.
 //
 // https://www.assemblyai.com/docs/Models/lemur#action-items
-func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsParameters) (LeMURActionItemsResponse, error) {
+func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsParams) (LeMURActionItemsResponse, error) {
 	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/action-items", params)
 	if err != nil {
 		return LeMURActionItemsResponse{}, err
@@ -66,7 +66,7 @@ func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsP
 // Task lets you submit a custom prompt to LeMUR.
 //
 // https://www.assemblyai.com/docs/Models/lemur#task
-func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParameters) (LeMURTaskResponse, error) {
+func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParams) (LeMURTaskResponse, error) {
 	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/task", params)
 	if err != nil {
 		return LeMURTaskResponse{}, err

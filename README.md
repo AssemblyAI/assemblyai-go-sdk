@@ -143,7 +143,7 @@ func main() {
 
 	client := assemblyai.NewClient(apiKey)
 
-	opts := &assemblyai.TranscriptSubmitOptions{
+	opts := &assemblyai.TranscriptParams{
 		EntityDetection: assemblyai.Bool(true),
 	}
 
@@ -154,7 +154,7 @@ func main() {
 
 	for _, entity := range transcript.Entities {
 		log.Println(*entity.Text)
-		log.Println(*entity.Type)
+		log.Println(entity.EntityType)
 		log.Printf("Timestamp: %v - %v", *entity.Start, *entity.End)
 	}
 }

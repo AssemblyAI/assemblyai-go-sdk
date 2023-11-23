@@ -87,123 +87,9 @@ type ContentSafetyLabelsResult struct {
 	Summary map[string]float64 `json:"summary,omitempty"`
 }
 
-type CreateRealtimeTemporaryTokenParameters struct {
+type CreateRealtimeTemporaryTokenParams struct {
 	// The amount of time until the token expires in seconds
 	ExpiresIn *int64 `json:"expires_in,omitempty"`
-}
-
-// The parameters for creating a transcript
-type CreateTranscriptOptionalParameters struct {
-	// The point in time, in milliseconds, to stop transcribing in your media file
-	AudioEndAt *int64 `json:"audio_end_at,omitempty"`
-
-	// The point in time, in milliseconds, to begin transcribing in your media file
-	AudioStartFrom *int64 `json:"audio_start_from,omitempty"`
-
-	// Enable [Auto Chapters](https://www.assemblyai.com/docs/Models/auto_chapters), can be true or false
-	AutoChapters *bool `json:"auto_chapters,omitempty"`
-
-	// Whether Key Phrases is enabled, either true or false
-	AutoHighlights *bool `json:"auto_highlights,omitempty"`
-
-	// The word boost parameter value
-	BoostParam TranscriptBoostParam `json:"boost_param,omitempty"`
-
-	// Enable [Content Moderation](https://www.assemblyai.com/docs/Models/content_moderation), can be true or false
-	ContentSafety *bool `json:"content_safety,omitempty"`
-
-	// Customize how words are spelled and formatted using to and from values
-	CustomSpelling []TranscriptCustomSpelling `json:"custom_spelling,omitempty"`
-
-	// Whether custom topics is enabled, either true or false
-	CustomTopics *bool `json:"custom_topics,omitempty"`
-
-	// Transcribe Filler Words, like "umm", in your media file; can be true or false
-	Disfluencies *bool `json:"disfluencies,omitempty"`
-
-	// Enable [Dual Channel](https://assemblyai.com/docs/Models/speech_recognition#dual-channel-transcription) transcription, can be true or false
-	DualChannel *bool `json:"dual_channel,omitempty"`
-
-	// Enable [Entity Detection](https://www.assemblyai.com/docs/Models/entity_detection), can be true or false
-	EntityDetection *bool `json:"entity_detection,omitempty"`
-
-	// Filter profanity from the transcribed text, can be true or false
-	FilterProfanity *bool `json:"filter_profanity,omitempty"`
-
-	// Enable Text Formatting, can be true or false
-	FormatText *bool `json:"format_text,omitempty"`
-
-	// Enable [Topic Detection](https://www.assemblyai.com/docs/Models/iab_classification), can be true or false
-	IABCategories *bool `json:"iab_categories,omitempty"`
-
-	// The language of your audio file. Possible values are found in [Supported Languages](https://www.assemblyai.com/docs/Concepts/supported_languages).
-	// The default value is 'en_us'.
-	LanguageCode TranscriptLanguageCode `json:"language_code,omitempty"`
-
-	// Whether [Automatic language detection](https://www.assemblyai.com/docs/Models/speech_recognition#automatic-language-detection) is enabled, either true or false
-	LanguageDetection *bool `json:"language_detection,omitempty"`
-
-	// Enable Automatic Punctuation, can be true or false
-	Punctuate *bool `json:"punctuate,omitempty"`
-
-	// Redact PII from the transcribed text using the Redact PII model, can be true or false
-	RedactPII *bool `json:"redact_pii,omitempty"`
-
-	// Generate a copy of the original media file with spoken PII "beeped" out, can be true or false. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
-	RedactPIIAudio *bool `json:"redact_pii_audio,omitempty"`
-
-	// Controls the filetype of the audio created by redact_pii_audio. Currently supports mp3 (default) and wav. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
-	RedactPIIAudioQuality *string `json:"redact_pii_audio_quality,omitempty"`
-
-	// The list of PII Redaction policies to enable. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
-	RedactPIIPolicies []PIIPolicy `json:"redact_pii_policies,omitempty"`
-
-	// The replacement logic for detected PII, can be "entity_type" or "hash". See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
-	RedactPIISub SubstitutionPolicy `json:"redact_pii_sub,omitempty"`
-
-	// Enable [Sentiment Analysis](https://www.assemblyai.com/docs/Models/sentiment_analysis), can be true or false
-	SentimentAnalysis *bool `json:"sentiment_analysis,omitempty"`
-
-	// Enable [Speaker diarization](https://www.assemblyai.com/docs/Models/speaker_diarization), can be true or false
-	SpeakerLabels *bool `json:"speaker_labels,omitempty"`
-
-	// Tell the speaker label model how many speakers it should attempt to identify, up to 10. See [Speaker diarization](https://www.assemblyai.com/docs/Models/speaker_diarization) for more details.
-	SpeakersExpected *int64 `json:"speakers_expected,omitempty"`
-
-	// Reject audio files that contain less than this fraction of speech.
-	// Valid values are in the range [0, 1] inclusive.
-	SpeechThreshold *float64 `json:"speech_threshold,omitempty"`
-
-	// Enable [Summarization](https://www.assemblyai.com/docs/Models/summarization), can be true or false
-	Summarization *bool `json:"summarization,omitempty"`
-
-	// The model to summarize the transcript
-	SummaryModel SummaryModel `json:"summary_model,omitempty"`
-
-	// The type of summary
-	SummaryType SummaryType `json:"summary_type,omitempty"`
-
-	// The list of custom topics provided, if custom topics is enabled
-	Topics []string `json:"topics,omitempty"`
-
-	// The header name which should be sent back with webhook calls
-	WebhookAuthHeaderName *string `json:"webhook_auth_header_name,omitempty"`
-
-	// Specify a header name and value to send back with a webhook call for added security
-	WebhookAuthHeaderValue *string `json:"webhook_auth_header_value,omitempty"`
-
-	// The URL to which AssemblyAI send webhooks upon trancription completion
-	WebhookURL *string `json:"webhook_url,omitempty"`
-
-	// The list of custom vocabulary to boost transcription probability for
-	WordBoost []string `json:"word_boost,omitempty"`
-}
-
-// The parameters for creating a transcript
-type CreateTranscriptParameters struct {
-	CreateTranscriptOptionalParameters
-	// The URL of the audio or video file to transcribe.
-	AudioURL *string `json:"audio_url,omitempty"`
 }
 
 // A detected entity
@@ -231,8 +117,8 @@ type Error struct {
 	Status *string `json:"status,omitempty"`
 }
 
-type LeMURActionItemsParameters struct {
-	LeMURBaseParameters
+type LeMURActionItemsParams struct {
+	LeMURBaseParams
 }
 
 type LeMURActionItemsResponse struct {
@@ -241,7 +127,7 @@ type LeMURActionItemsResponse struct {
 	Response *string `json:"response,omitempty"`
 }
 
-type LeMURBaseParameters struct {
+type LeMURBaseParams struct {
 	// Context to provide the model. This can be a string or a free-form JSON value.
 	Context json.RawMessage `json:"context,omitempty"`
 
@@ -295,8 +181,8 @@ type LeMURQuestionAnswer struct {
 	Question *string `json:"question,omitempty"`
 }
 
-type LeMURQuestionAnswerParameters struct {
-	LeMURBaseParameters
+type LeMURQuestionAnswerParams struct {
+	LeMURBaseParams
 	// A list of questions to ask
 	Questions []LeMURQuestion `json:"questions,omitempty"`
 }
@@ -307,8 +193,8 @@ type LeMURQuestionAnswerResponse struct {
 	Response []LeMURQuestionAnswer `json:"response,omitempty"`
 }
 
-type LeMURSummaryParameters struct {
-	LeMURBaseParameters
+type LeMURSummaryParams struct {
+	LeMURBaseParams
 	// How you want the summary to be returned. This can be any text. Examples: "TLDR", "bullet points"
 	AnswerFormat *string `json:"answer_format,omitempty"`
 }
@@ -319,8 +205,8 @@ type LeMURSummaryResponse struct {
 	Response *string `json:"response,omitempty"`
 }
 
-type LeMURTaskParameters struct {
-	LeMURBaseParameters
+type LeMURTaskParams struct {
+	LeMURBaseParams
 	// Your text to prompt the model to produce a desired output, including any context you want to pass into the model.
 	Prompt *string `json:"prompt,omitempty"`
 }
@@ -329,6 +215,26 @@ type LeMURTaskResponse struct {
 	LeMURBaseResponse
 	// The response generated by LeMUR
 	Response *string `json:"response,omitempty"`
+}
+
+type ListTranscriptParams struct {
+	// Get transcripts that were created after this transcript ID
+	AfterID *string `url:"after_id,omitempty"`
+
+	// Get transcripts that were created before this transcript ID
+	BeforeID *string `url:"before_id,omitempty"`
+
+	// Only get transcripts created on this date
+	CreatedOn *string `url:"created_on,omitempty"`
+
+	// Maximum amount of transcripts to retrieve
+	Limit *int64 `url:"limit,omitempty"`
+
+	// Filter by transcript status
+	Status TranscriptStatus `url:"status,omitempty"`
+
+	// Only get throttled transcripts, overrides the status filter
+	ThrottledOnly *bool `url:"throttled_only,omitempty"`
 }
 
 type PageDetails struct {
@@ -691,24 +597,111 @@ type TranscriptListItem struct {
 	Status TranscriptStatus `json:"status,omitempty"`
 }
 
-type TranscriptListParameters struct {
-	// Get transcripts that were created after this transcript ID
-	AfterID *string `url:"after_id,omitempty"`
+// The parameters for creating a transcript
+type TranscriptOptionalParams struct {
+	// The point in time, in milliseconds, to stop transcribing in your media file
+	AudioEndAt *int64 `json:"audio_end_at,omitempty"`
 
-	// Get transcripts that were created before this transcript ID
-	BeforeID *string `url:"before_id,omitempty"`
+	// The point in time, in milliseconds, to begin transcribing in your media file
+	AudioStartFrom *int64 `json:"audio_start_from,omitempty"`
 
-	// Only get transcripts created on this date
-	CreatedOn *string `url:"created_on,omitempty"`
+	// Enable [Auto Chapters](https://www.assemblyai.com/docs/Models/auto_chapters), can be true or false
+	AutoChapters *bool `json:"auto_chapters,omitempty"`
 
-	// Maximum amount of transcripts to retrieve
-	Limit *int64 `url:"limit,omitempty"`
+	// Whether Key Phrases is enabled, either true or false
+	AutoHighlights *bool `json:"auto_highlights,omitempty"`
 
-	// Filter by transcript status
-	Status TranscriptStatus `url:"status,omitempty"`
+	// The word boost parameter value
+	BoostParam TranscriptBoostParam `json:"boost_param,omitempty"`
 
-	// Only get throttled transcripts, overrides the status filter
-	ThrottledOnly *bool `url:"throttled_only,omitempty"`
+	// Enable [Content Moderation](https://www.assemblyai.com/docs/Models/content_moderation), can be true or false
+	ContentSafety *bool `json:"content_safety,omitempty"`
+
+	// Customize how words are spelled and formatted using to and from values
+	CustomSpelling []TranscriptCustomSpelling `json:"custom_spelling,omitempty"`
+
+	// Whether custom topics is enabled, either true or false
+	CustomTopics *bool `json:"custom_topics,omitempty"`
+
+	// Transcribe Filler Words, like "umm", in your media file; can be true or false
+	Disfluencies *bool `json:"disfluencies,omitempty"`
+
+	// Enable [Dual Channel](https://assemblyai.com/docs/Models/speech_recognition#dual-channel-transcription) transcription, can be true or false
+	DualChannel *bool `json:"dual_channel,omitempty"`
+
+	// Enable [Entity Detection](https://www.assemblyai.com/docs/Models/entity_detection), can be true or false
+	EntityDetection *bool `json:"entity_detection,omitempty"`
+
+	// Filter profanity from the transcribed text, can be true or false
+	FilterProfanity *bool `json:"filter_profanity,omitempty"`
+
+	// Enable Text Formatting, can be true or false
+	FormatText *bool `json:"format_text,omitempty"`
+
+	// Enable [Topic Detection](https://www.assemblyai.com/docs/Models/iab_classification), can be true or false
+	IABCategories *bool `json:"iab_categories,omitempty"`
+
+	// The language of your audio file. Possible values are found in [Supported Languages](https://www.assemblyai.com/docs/Concepts/supported_languages).
+	// The default value is 'en_us'.
+	LanguageCode TranscriptLanguageCode `json:"language_code,omitempty"`
+
+	// Whether [Automatic language detection](https://www.assemblyai.com/docs/Models/speech_recognition#automatic-language-detection) is enabled, either true or false
+	LanguageDetection *bool `json:"language_detection,omitempty"`
+
+	// Enable Automatic Punctuation, can be true or false
+	Punctuate *bool `json:"punctuate,omitempty"`
+
+	// Redact PII from the transcribed text using the Redact PII model, can be true or false
+	RedactPII *bool `json:"redact_pii,omitempty"`
+
+	// Generate a copy of the original media file with spoken PII "beeped" out, can be true or false. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
+	RedactPIIAudio *bool `json:"redact_pii_audio,omitempty"`
+
+	// Controls the filetype of the audio created by redact_pii_audio. Currently supports mp3 (default) and wav. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
+	RedactPIIAudioQuality *string `json:"redact_pii_audio_quality,omitempty"`
+
+	// The list of PII Redaction policies to enable. See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
+	RedactPIIPolicies []PIIPolicy `json:"redact_pii_policies,omitempty"`
+
+	// The replacement logic for detected PII, can be "entity_type" or "hash". See [PII redaction](https://www.assemblyai.com/docs/Models/pii_redaction) for more details.
+	RedactPIISub SubstitutionPolicy `json:"redact_pii_sub,omitempty"`
+
+	// Enable [Sentiment Analysis](https://www.assemblyai.com/docs/Models/sentiment_analysis), can be true or false
+	SentimentAnalysis *bool `json:"sentiment_analysis,omitempty"`
+
+	// Enable [Speaker diarization](https://www.assemblyai.com/docs/Models/speaker_diarization), can be true or false
+	SpeakerLabels *bool `json:"speaker_labels,omitempty"`
+
+	// Tell the speaker label model how many speakers it should attempt to identify, up to 10. See [Speaker diarization](https://www.assemblyai.com/docs/Models/speaker_diarization) for more details.
+	SpeakersExpected *int64 `json:"speakers_expected,omitempty"`
+
+	// Reject audio files that contain less than this fraction of speech.
+	// Valid values are in the range [0, 1] inclusive.
+	SpeechThreshold *float64 `json:"speech_threshold,omitempty"`
+
+	// Enable [Summarization](https://www.assemblyai.com/docs/Models/summarization), can be true or false
+	Summarization *bool `json:"summarization,omitempty"`
+
+	// The model to summarize the transcript
+	SummaryModel SummaryModel `json:"summary_model,omitempty"`
+
+	// The type of summary
+	SummaryType SummaryType `json:"summary_type,omitempty"`
+
+	// The list of custom topics provided, if custom topics is enabled
+	Topics []string `json:"topics,omitempty"`
+
+	// The header name which should be sent back with webhook calls
+	WebhookAuthHeaderName *string `json:"webhook_auth_header_name,omitempty"`
+
+	// Specify a header name and value to send back with a webhook call for added security
+	WebhookAuthHeaderValue *string `json:"webhook_auth_header_value,omitempty"`
+
+	// The URL to which AssemblyAI send webhooks upon trancription completion
+	WebhookURL *string `json:"webhook_url,omitempty"`
+
+	// The list of custom vocabulary to boost transcription probability for
+	WordBoost []string `json:"word_boost,omitempty"`
 }
 
 type TranscriptParagraph struct {
@@ -721,6 +714,13 @@ type TranscriptParagraph struct {
 	Text *string `json:"text,omitempty"`
 
 	Words []TranscriptWord `json:"words,omitempty"`
+}
+
+// The parameters for creating a transcript
+type TranscriptParams struct {
+	TranscriptOptionalParams
+	// The URL of the audio or video file to transcribe.
+	AudioURL *string `json:"audio_url,omitempty"`
 }
 
 type TranscriptSentence struct {

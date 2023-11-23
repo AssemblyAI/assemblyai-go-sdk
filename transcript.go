@@ -26,15 +26,15 @@ type TranscriptService struct {
 // Submit submits an audio file for transcription.
 //
 // https://www.assemblyai.com/docs/API%20reference/transcript#create-a-transcript
-func (s *TranscriptService) Submit(ctx context.Context, audioURL string, opts *CreateTranscriptOptionalParameters) (Transcript, error) {
+func (s *TranscriptService) Submit(ctx context.Context, audioURL string, opts *TranscriptOptionalParams) (Transcript, error) {
 	var transcript Transcript
 
-	params := CreateTranscriptParameters{
+	params := TranscriptParams{
 		AudioURL: String(audioURL),
 	}
 
 	if opts != nil {
-		params.CreateTranscriptOptionalParameters = *opts
+		params.TranscriptOptionalParams = *opts
 	}
 
 	req, err := s.client.newJSONRequest("POST", "/v2/transcript", params)
@@ -175,7 +175,7 @@ func (s *TranscriptService) GetSubtitles(ctx context.Context, transcriptID strin
 // List returns a collection of transcripts based on a filter.
 //
 // https://www.assemblyai.com/docs/API%20reference/listing_and_deleting#listing-historical-transcripts
-func (s *TranscriptService) List(ctx context.Context, options TranscriptListParameters) (TranscriptList, error) {
+func (s *TranscriptService) List(ctx context.Context, options ListTranscriptParams) (TranscriptList, error) {
 	req, err := s.client.newJSONRequest("GET", "/v2/transcript", options)
 	if err != nil {
 		return TranscriptList{}, err
@@ -223,7 +223,7 @@ func (s *TranscriptService) Wait(ctx context.Context, transcriptID string) (Tran
 	}
 }
 
-func (s *TranscriptService) TranscribeFromURL(ctx context.Context, audioURL string, opts *CreateTranscriptOptionalParameters) (Transcript, error) {
+func (s *TranscriptService) TranscribeFromURL(ctx context.Context, audioURL string, opts *TranscriptOptionalParams) (Transcript, error) {
 	transcript, err := s.Submit(ctx, audioURL, opts)
 	if err != nil {
 		return transcript, err
@@ -231,7 +231,7 @@ func (s *TranscriptService) TranscribeFromURL(ctx context.Context, audioURL stri
 	return s.Wait(ctx, *transcript.ID)
 }
 
-func (s *TranscriptService) TranscribeFromReader(ctx context.Context, reader io.Reader, opts *CreateTranscriptOptionalParameters) (Transcript, error) {
+func (s *TranscriptService) TranscribeFromReader(ctx context.Context, reader io.Reader, opts *TranscriptOptionalParams) (Transcript, error) {
 	u, err := s.client.Upload(ctx, reader)
 	if err != nil {
 		return Transcript{}, err

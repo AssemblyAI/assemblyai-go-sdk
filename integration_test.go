@@ -90,8 +90,8 @@ func TestIntegration(t *testing.T) {
 
 	t.Logf("summarizing transcript (%v)...", transcript.ID)
 
-	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParameters{
-		LeMURBaseParameters: LeMURBaseParameters{
+	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParams{
+		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{ToString(transcript.ID)},
 		},
 	})
