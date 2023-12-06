@@ -58,7 +58,7 @@ func TestIntegration(t *testing.T) {
 	t.Log("uploaded file")
 	t.Logf("submitting %q...", audioURL)
 
-	transcript, err := client.Transcripts.Submit(ctx, audioURL, nil)
+	transcript, err := client.Transcripts.SubmitFromURL(ctx, audioURL, nil)
 	if err != nil {
 		t.Fatalf("Transcripts.Submit returned error: %v", err)
 	}

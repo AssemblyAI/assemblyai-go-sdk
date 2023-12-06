@@ -45,7 +45,7 @@ func TestTranscripts_Submit(t *testing.T) {
 
 	ctx := context.Background()
 
-	transcript, err := client.Transcripts.Submit(ctx, fakeAudioURL, nil)
+	transcript, err := client.Transcripts.SubmitFromURL(ctx, fakeAudioURL, nil)
 	if err != nil {
 		t.Errorf("Transcripts.Submit returned error: %v", err)
 	}
