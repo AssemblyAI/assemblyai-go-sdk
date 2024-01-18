@@ -9,3 +9,5 @@ require (
 	github.com/gordonklaus/portaudio v0.0.0-20230709114228-aafa478834f5
 	nhooyr.io/websocket v1.8.7
 )
+
+require github.com/klauspost/compress v1.10.3 // indirect
