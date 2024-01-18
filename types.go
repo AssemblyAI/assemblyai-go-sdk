@@ -131,6 +131,8 @@ type LeMURBaseParams struct {
 	// Context to provide the model. This can be a string or a free-form JSON value.
 	Context json.RawMessage `json:"context,omitempty"`
 
+	// The model that is used for the final prompt after compression is performed.
+	// Defaults to "default".
 	FinalModel LeMURModel `json:"final_model,omitempty"`
 
 	// Custom formatted transcript data. Maximum size is the context limit of the selected model, which defaults to 100000.
@@ -155,7 +157,7 @@ type LeMURBaseResponse struct {
 	RequestID *string `json:"request_id,omitempty"`
 }
 
-// The model that is used for the final prompt after compression is performed (options: "basic" and "default").
+// The model that is used for the final prompt after compression is performed.
 type LeMURModel string
 
 type LeMURQuestion struct {
@@ -276,6 +278,9 @@ type RealtimeTemporaryTokenResponse struct {
 	// The temporary authentication token for real-time transcription
 	Token *string `json:"token,omitempty"`
 }
+
+// Controls the filetype of the audio created by redact_pii_audio. Currently supports mp3 (default) and wav. See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more details.
+type RedactPIIAudioQuality string
 
 type RedactedAudioResponse struct {
 	// The URL of the redacted audio file
@@ -483,7 +488,7 @@ type Transcript struct {
 
 	// The audio quality of the PII-redacted audio file, if redact_pii_audio is enabled.
 	// See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more information.
-	RedactPIIAudioQuality *string `json:"redact_pii_audio_quality,omitempty"`
+	RedactPIIAudioQuality RedactPIIAudioQuality `json:"redact_pii_audio_quality,omitempty"`
 
 	// The list of PII Redaction policies that were enabled, if PII Redaction is enabled.
 	// See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more information.
@@ -617,6 +622,9 @@ type TranscriptOptionalParams struct {
 	// Enable [Content Moderation](https://www.assemblyai.com/docs/models/content-moderation), can be true or false
 	ContentSafety *bool `json:"content_safety,omitempty"`
 
+	// The confidence threshold for content moderation. Values must be between 25 and 100.
+	ContentSafetyConfidence *int64 `json:"content_safety_confidence,omitempty"`
+
 	// Customize how words are spelled and formatted using to and from values
 	CustomSpelling []TranscriptCustomSpelling `json:"custom_spelling,omitempty"`
 
@@ -658,7 +666,7 @@ type TranscriptOptionalParams struct {
 	RedactPIIAudio *bool `json:"redact_pii_audio,omitempty"`
 
 	// Controls the filetype of the audio created by redact_pii_audio. Currently supports mp3 (default) and wav. See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more details.
-	RedactPIIAudioQuality *string `json:"redact_pii_audio_quality,omitempty"`
+	RedactPIIAudioQuality RedactPIIAudioQuality `json:"redact_pii_audio_quality,omitempty"`
 
 	// The list of PII Redaction policies to enable. See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more details.
 	RedactPIIPolicies []PIIPolicy `json:"redact_pii_policies,omitempty"`
