@@ -23,10 +23,11 @@ type TranscriptService struct {
 	client *Client
 }
 
-// Submit submits an audio file for transcription.
+// SubmitFromURL submits an audio file for transcription without waiting for it
+// to finish.
 //
 // https://www.assemblyai.com/docs/API%20reference/transcript#create-a-transcript
-func (s *TranscriptService) Submit(ctx context.Context, audioURL string, opts *TranscriptOptionalParams) (Transcript, error) {
+func (s *TranscriptService) SubmitFromURL(ctx context.Context, audioURL string, opts *TranscriptOptionalParams) (Transcript, error) {
 	var transcript Transcript
 
 	params := TranscriptParams{
@@ -49,6 +50,16 @@ func (s *TranscriptService) Submit(ctx context.Context, audioURL string, opts *T
 	defer resp.Body.Close()
 
 	return transcript, nil
+}
+
+// SubmitFromReader submits audio for transcription without waiting for it to
+// finish.
+func (s *TranscriptService) SubmitFromReader(ctx context.Context, reader io.Reader, params *TranscriptOptionalParams) (Transcript, error) {
+	u, err := s.client.Upload(ctx, reader)
+	if err != nil {
+		return Transcript{}, err
+	}
+	return s.SubmitFromURL(ctx, u, params)
 }
 
 // Delete permanently deletes a transcript.
@@ -223,18 +234,20 @@ func (s *TranscriptService) Wait(ctx context.Context, transcriptID string) (Tran
 	}
 }
 
+// TranscribeFromURL submits a URL to an audio file for transcription and waits for it to finish.
 func (s *TranscriptService) TranscribeFromURL(ctx context.Context, audioURL string, opts *TranscriptOptionalParams) (Transcript, error) {
-	transcript, err := s.Submit(ctx, audioURL, opts)
+	transcript, err := s.SubmitFromURL(ctx, audioURL, opts)
 	if err != nil {
 		return transcript, err
 	}
 	return s.Wait(ctx, *transcript.ID)
 }
 
+// TranscribeFromReader submits audio for transcription and waits for it to finish.
 func (s *TranscriptService) TranscribeFromReader(ctx context.Context, reader io.Reader, opts *TranscriptOptionalParams) (Transcript, error) {
-	u, err := s.client.Upload(ctx, reader)
+	transcript, err := s.SubmitFromReader(ctx, reader, opts)
 	if err != nil {
-		return Transcript{}, err
+		return transcript, err
 	}
-	return s.TranscribeFromURL(ctx, u, opts)
+	return s.Wait(ctx, *transcript.ID)
 }
