@@ -183,6 +183,25 @@ func WithRealTimeWordBoost(wordBoost []string) RealTimeClientOption {
 	}
 }
 
+// RealTimeEncoding is the encoding format for the audio data.
+type RealTimeEncoding string
+
+const (
+	// PCM signed 16-bit little-endian (default)
+	RealTimeEncodingPCMS16LE RealTimeEncoding = "pcm_s16le"
+
+	// PCM Mu-law
+	RealTimeEncodingPCMMulaw RealTimeEncoding = "pcm_mulaw"
+)
+
+func WithRealTimeEncoding(encoding RealTimeEncoding) RealTimeClientOption {
+	return func(rtc *RealTimeClient) {
+		vs := rtc.baseURL.Query()
+		vs.Set("encoding", string(encoding))
+		rtc.baseURL.RawQuery = vs.Encode()
+	}
+}
+
 func NewRealTimeClientWithOptions(options ...RealTimeClientOption) *RealTimeClient {
 	client := &RealTimeClient{
 		baseURL: &url.URL{
