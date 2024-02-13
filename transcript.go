@@ -18,6 +18,10 @@ const (
 	TranscriptStatusError      TranscriptStatus = "error"
 )
 
+const (
+	SpeechModelNano SpeechModel = "nano"
+)
+
 // TranscriptService groups the operations related to transcribing audio.
 type TranscriptService struct {
 	client *Client
