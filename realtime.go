@@ -42,6 +42,16 @@ type TerminateSession struct {
 	TerminateSession bool `json:"terminate_session"`
 }
 
+type endUtteranceSilenceThreshold struct {
+	// Set to true to configure the silence threshold for ending utterances.
+	EndUtteranceSilenceThreshold int64 `json:"end_utterance_silence_threshold"`
+}
+
+type forceEndUtterance struct {
+	// Set to true to manually end the current utterance.
+	ForceEndUtterance bool `json:"force_end_utterance"`
+}
+
 type RealTimeBaseMessage struct {
 	// Describes the type of the message
 	MessageType MessageType `json:"message_type"`
@@ -384,4 +394,19 @@ func (c *RealTimeClient) Send(ctx context.Context, samples []byte) error {
 	}
 
 	return wsjson.Write(ctx, c.conn, data)
+}
+
+// ForceEndUtterance manually ends an utterance.
+func (c *RealTimeClient) ForceEndUtterance(ctx context.Context) error {
+	return wsjson.Write(ctx, c.conn, forceEndUtterance{
+		ForceEndUtterance: true,
+	})
+}
+
+// SetEndUtteranceSilenceThreshold configures the threshold for how long to wait
+// before ending an utterance. Default is 700ms.
+func (c *RealTimeClient) SetEndUtteranceSilenceThreshold(ctx context.Context, threshold int64) error {
+	return wsjson.Write(ctx, c.conn, endUtteranceSilenceThreshold{
+		EndUtteranceSilenceThreshold: threshold,
+	})
 }
