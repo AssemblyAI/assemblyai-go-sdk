@@ -119,6 +119,9 @@ type Error struct {
 
 type LeMURActionItemsParams struct {
 	LeMURBaseParams
+	// How you want the action items to be returned. This can be any text.
+	// Defaults to "Bullet Points".
+	AnswerFormat *string `json:"answer_format,omitempty"`
 }
 
 type LeMURActionItemsResponse struct {
@@ -334,6 +337,9 @@ type SeverityScoreSummary struct {
 	Medium *float64 `json:"medium,omitempty"`
 }
 
+// The speech model to use for the transcription.
+type SpeechModel string
+
 // The replacement logic for detected PII, can be "entity_type" or "hash". See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more details.
 type SubstitutionPolicy string
 
@@ -510,6 +516,9 @@ type Transcript struct {
 	// Tell the speaker label model how many speakers it should attempt to identify, up to 10. See [Speaker diarization](https://www.assemblyai.com/docs/models/speaker-diarization) for more details.
 	SpeakersExpected *int64 `json:"speakers_expected,omitempty"`
 
+	// The speech model used for the transcription. When `null`, the default model is used.
+	SpeechModel SpeechModel `json:"speech_model,omitempty"`
+
 	// Defaults to null. Reject audio files that contain less than this fraction of speech.
 	// Valid values are in the range [0, 1] inclusive.
 	SpeechThreshold *float64 `json:"speech_threshold,omitempty"`
@@ -682,6 +691,9 @@ type TranscriptOptionalParams struct {
 
 	// Tells the speaker label model how many speakers it should attempt to identify, up to 10. See [Speaker diarization](https://www.assemblyai.com/docs/models/speaker-diarization) for more details.
 	SpeakersExpected *int64 `json:"speakers_expected,omitempty"`
+
+	// The speech model to use for the transcription. When `null`, the default model is used.
+	SpeechModel SpeechModel `json:"speech_model,omitempty"`
 
 	// Reject audio files that contain less than this fraction of speech.
 	// Valid values are in the range [0, 1] inclusive.

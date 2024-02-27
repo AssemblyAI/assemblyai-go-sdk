@@ -168,6 +168,102 @@ func TestRealTime_TerminateSessionOnDisconnect(t *testing.T) {
 	}
 }
 
+func TestRealTime_ForceEndUtterance(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		conn, teardown := upgradeRequest(w, r)
+		defer teardown()
+
+		if err := beginSession(ctx, conn); err != nil {
+			t.Error(err)
+		}
+
+		_, b, _ := conn.Read(ctx)
+
+		got := strings.TrimSpace(string(b))
+		want := `{"force_end_utterance":true}`
+
+		if got != want {
+			t.Errorf("message = %v, want %v", got, want)
+		}
+
+		if err := terminateSession(t, ctx, conn); err != nil {
+			t.Errorf("terminateSession returned error: %v", err)
+		}
+	}))
+	defer ts.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/ws"
+
+	handler := &mockRealtimeHandler{}
+
+	client := NewRealTimeClientWithOptions(WithRealTimeBaseURL(wsURL), WithHandler(handler))
+
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect returned error: %v", err)
+	}
+
+	if err := client.ForceEndUtterance(ctx); err != nil {
+		t.Errorf("ForceEndUtterance returned error: %v", err)
+	}
+
+	if err := client.Disconnect(ctx, true); err != nil {
+		t.Errorf("Disconnect returned error: %v", err)
+	}
+}
+
+func TestRealTime_SetEndUtteranceSilenceThreshold(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		conn, teardown := upgradeRequest(w, r)
+		defer teardown()
+
+		if err := beginSession(ctx, conn); err != nil {
+			t.Error(err)
+		}
+
+		_, b, _ := conn.Read(ctx)
+
+		got := strings.TrimSpace(string(b))
+		want := `{"end_utterance_silence_threshold":350}`
+
+		if got != want {
+			t.Errorf("message = %v, want %v", got, want)
+		}
+
+		if err := terminateSession(t, ctx, conn); err != nil {
+			t.Errorf("terminateSession returned error: %v", err)
+		}
+	}))
+	defer ts.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/ws"
+
+	handler := &mockRealtimeHandler{}
+
+	client := NewRealTimeClientWithOptions(WithRealTimeBaseURL(wsURL), WithHandler(handler))
+
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect returned error: %v", err)
+	}
+
+	if err := client.SetEndUtteranceSilenceThreshold(ctx, 350); err != nil {
+		t.Errorf("SetEndUtteranceSilenceThreshold returned error: %v", err)
+	}
+
+	if err := client.Disconnect(ctx, true); err != nil {
+		t.Errorf("Disconnect returned error: %v", err)
+	}
+}
+
 func beginSession(ctx context.Context, conn *websocket.Conn) error {
 	return wsjson.Write(ctx, conn, map[string]interface{}{"message_type": string(MessageTypeSessionBegins)})
 }
