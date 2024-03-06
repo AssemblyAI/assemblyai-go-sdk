@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -254,4 +255,26 @@ func (s *TranscriptService) TranscribeFromReader(ctx context.Context, reader io.
 		return transcript, err
 	}
 	return s.Wait(ctx, *transcript.ID)
+}
+
+// WordSearch searches a transcript for any occurrences of the provided words.
+func (s *TranscriptService) WordSearch(ctx context.Context, transcriptID string, words []string) (WordSearchResponse, error) {
+	values := url.Values{}
+	values.Set("words", strings.Join(words, ","))
+
+	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID, "/word-search?", values.Encode()), nil)
+	if err != nil {
+		return WordSearchResponse{}, err
+	}
+
+	var results WordSearchResponse
+
+	resp, err := s.client.do(ctx, req, &results)
+	if err != nil {
+		return WordSearchResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	return results, nil
+
 }

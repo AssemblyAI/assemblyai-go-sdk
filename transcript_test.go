@@ -211,3 +211,45 @@ func TestTranscripts_List(t *testing.T) {
 		t.Errorf(cmp.Diff(want, results))
 	}
 }
+
+func TestTranscripts_SearchWords(t *testing.T) {
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/v2/transcript/"+fakeTranscriptID+"/word-search", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testQuery(t, r, "words=hopkins%2Cwildfires")
+
+		writeFileResponse(t, w, "testdata/transcript/word-search.json")
+	})
+
+	ctx := context.Background()
+
+	results, err := client.Transcripts.WordSearch(ctx, fakeTranscriptID, []string{"hopkins", "wildfires"})
+	if err != nil {
+		t.Errorf("Transcripts.WordSearch returned error: %v", err)
+	}
+
+	want := WordSearchResponse{
+		ID: String("bfc3622e-8c69-4497-9a84-fb65b30dcb07"),
+		Matches: []WordSearchMatch{
+			{
+				Count:      Int64(2),
+				Indexes:    []int64{68, 835},
+				Text:       String("hopkins"),
+				Timestamps: []WordSearchTimestamp{{24298, 24714}, {273498, 274090}},
+			},
+			{
+				Count:      Int64(4),
+				Indexes:    []int64{4, 90, 140, 716},
+				Text:       String("wildfires"),
+				Timestamps: []WordSearchTimestamp{{1668, 2346}, {33852, 34546}, {50118, 51110}, {231356, 232354}},
+			},
+		},
+		TotalCount: Int64(6),
+	}
+
+	if !cmp.Equal(results, want) {
+		t.Errorf(cmp.Diff(want, results))
+	}
+}
