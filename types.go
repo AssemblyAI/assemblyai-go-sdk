@@ -131,8 +131,8 @@ type LeMURActionItemsResponse struct {
 }
 
 type LeMURBaseParams struct {
-	// Context to provide the model. This can be a string or a free-form JSON value.
-	Context json.RawMessage `json:"context,omitempty"`
+	// Context to provide the model. This can be a string or struct.
+	Context interface{} `json:"context,omitempty"`
 
 	// The model that is used for the final prompt after compression is performed.
 	// Defaults to "default".
