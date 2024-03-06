@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
@@ -25,12 +26,11 @@ func TestRealTime_Send(t *testing.T) {
 			t.Error(err)
 		}
 
-		_, b, _ := conn.Read(ctx)
+		_, got, _ := conn.Read(ctx)
 
-		got := strings.TrimSpace(string(b))
-		want := `{"audio_data":"Zm9v"}`
+		want := []byte("foo")
 
-		if got != want {
+		if !cmp.Equal(got, want) {
 			t.Errorf("message = %v, want %v", got, want)
 		}
 

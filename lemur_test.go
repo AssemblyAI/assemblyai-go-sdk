@@ -22,6 +22,7 @@ func TestLeMUR_Summarize(t *testing.T) {
 		want := LeMURSummaryParams{
 			LeMURBaseParams: LeMURBaseParams{
 				TranscriptIDs: []string{"transcript_id"},
+				Context:       "Additional context",
 			},
 		}
 
@@ -37,6 +38,50 @@ func TestLeMUR_Summarize(t *testing.T) {
 	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParams{
 		LeMURBaseParams: LeMURBaseParams{
 			TranscriptIDs: []string{"transcript_id"},
+			Context:       "Additional context",
+		},
+	})
+	if err != nil {
+		t.Errorf("Submit returned error: %v", err)
+	}
+
+	want := lemurSummaryWildfires
+
+	if *response.Response != want {
+		t.Errorf("LeMUR.Summarize = %v, want = %v", response, want)
+	}
+}
+
+func TestLeMUR_SummarizeWithStructContext(t *testing.T) {
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/lemur/v3/generate/summary", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+
+		var body LeMURSummaryParams
+		json.NewDecoder(r.Body).Decode(&body)
+
+		want := LeMURSummaryParams{
+			LeMURBaseParams: LeMURBaseParams{
+				TranscriptIDs: []string{"transcript_id"},
+				Context:       map[string]interface{}{"key": "value"},
+			},
+		}
+
+		if !cmp.Equal(body, want) {
+			t.Errorf("Request body = %+v, want = %+v", body, want)
+		}
+
+		writeFileResponse(t, w, "testdata/lemur/summarize.json")
+	})
+
+	ctx := context.Background()
+
+	response, err := client.LeMUR.Summarize(ctx, LeMURSummaryParams{
+		LeMURBaseParams: LeMURBaseParams{
+			TranscriptIDs: []string{"transcript_id"},
+			Context:       map[string]interface{}{"key": "value"},
 		},
 	})
 	if err != nil {
@@ -191,5 +236,27 @@ then get into the examples with feedback.
 
 	if *response.Response != want {
 		t.Errorf("LeMUR.ActionItems = %v, want = %v", response, want)
+	}
+}
+
+func TestLeMUR_PurgeRequestData(t *testing.T) {
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/lemur/v3/23f1485d-b3ba-4bba-8910-c16085e1afa5", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+
+		writeFileResponse(t, w, "testdata/lemur/purge-request-data.json")
+	})
+
+	ctx := context.Background()
+
+	response, err := client.LeMUR.PurgeRequestData(ctx, "23f1485d-b3ba-4bba-8910-c16085e1afa5")
+	if err != nil {
+		t.Errorf("PurgeRequestData returned error: %v", err)
+	}
+
+	if !ToBool(response.Deleted) {
+		t.Errorf("LeMUR request was not deleted")
 	}
 }
