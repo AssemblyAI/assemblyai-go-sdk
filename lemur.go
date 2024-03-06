@@ -80,3 +80,18 @@ func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParams) (LeMURT
 
 	return response, nil
 }
+
+func (s *LeMURService) PurgeRequestData(ctx context.Context, requestID string) (PurgeLeMURRequestDataResponse, error) {
+	req, err := s.client.newJSONRequest("DELETE", "/lemur/v3/"+requestID, nil)
+	if err != nil {
+		return PurgeLeMURRequestDataResponse{}, err
+	}
+
+	var response PurgeLeMURRequestDataResponse
+
+	if _, err := s.client.do(ctx, req, &response); err != nil {
+		return PurgeLeMURRequestDataResponse{}, err
+	}
+
+	return response, nil
+}

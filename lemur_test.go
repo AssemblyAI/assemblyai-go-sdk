@@ -238,3 +238,25 @@ then get into the examples with feedback.
 		t.Errorf("LeMUR.ActionItems = %v, want = %v", response, want)
 	}
 }
+
+func TestLeMUR_PurgeRequestData(t *testing.T) {
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/lemur/v3/23f1485d-b3ba-4bba-8910-c16085e1afa5", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+
+		writeFileResponse(t, w, "testdata/lemur/purge-request-data.json")
+	})
+
+	ctx := context.Background()
+
+	response, err := client.LeMUR.PurgeRequestData(ctx, "23f1485d-b3ba-4bba-8910-c16085e1afa5")
+	if err != nil {
+		t.Errorf("PurgeRequestData returned error: %v", err)
+	}
+
+	if !ToBool(response.Deleted) {
+		t.Errorf("LeMUR request was not deleted")
+	}
+}
