@@ -2,7 +2,6 @@ package assemblyai
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -389,11 +388,7 @@ func (c *RealTimeClient) Send(ctx context.Context, samples []byte) error {
 		return ErrSessionClosed
 	}
 
-	data := AudioData{
-		AudioData: base64.StdEncoding.EncodeToString(samples),
-	}
-
-	return wsjson.Write(ctx, c.conn, data)
+	return c.conn.Write(ctx, websocket.MessageBinary, samples)
 }
 
 // ForceEndUtterance manually ends an utterance.
