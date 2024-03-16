@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	version              = "1.3.0"
+	version              = "1.4.0"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
 	defaultUserAgent     = "assemblyai-go/" + version
@@ -27,6 +27,7 @@ type Client struct {
 
 	Transcripts *TranscriptService
 	LeMUR       *LeMURService
+	RealTime    *RealTimeService
 }
 
 // NewClientWithOptions returns a new configurable AssemblyAI client. If you provide client
@@ -51,6 +52,7 @@ func NewClientWithOptions(opts ...ClientOption) *Client {
 
 	c.Transcripts = &TranscriptService{client: c}
 	c.LeMUR = &LeMURService{client: c}
+	c.RealTime = &RealTimeService{client: c}
 
 	return c
 }
