@@ -4,6 +4,26 @@ import (
 	"context"
 )
 
+const (
+	// LeMUR Default is best at complex reasoning. It offers more nuanced
+	// responses and improved contextual comprehension.
+	LeMURModelDefault LeMURModel = "default"
+
+	// LeMUR Basic is a simplified model optimized for speed and cost. LeMUR
+	// Basic can complete requests up to 20% faster than Default.
+	LeMURModelBasic LeMURModel = "basic"
+
+	// Claude 2.1 is similar to Default, with key improvements: it minimizes
+	// model hallucination and system prompts, has a larger context window, and
+	// performs better in citations.
+	LeMURModelAssemblyAIMistral7B LeMURModel = "assemblyai/mistral-7b"
+
+	// LeMUR Mistral 7B is an LLM self-hosted by AssemblyAI. It's the fastest
+	// and cheapest of the LLM options. We recommend it for use cases like basic
+	// summaries and factual Q&A.
+	LeMURModelAnthropicClaude2_1 LeMURModel = "anthropic/claude-2-1"
+)
+
 // LeMURService groups the operations related to LeMUR.
 type LeMURService struct {
 	client *Client
