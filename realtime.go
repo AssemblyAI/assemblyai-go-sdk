@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,10 +14,12 @@ import (
 )
 
 var (
-	// ErrSessionClosed is returned when attempting to write to a closed session.
+	// ErrSessionClosed is returned when attempting to write to a closed
+	// session.
 	ErrSessionClosed = errors.New("session closed")
 
-	// ErrDisconnected is returned when attempting to write to a disconnected client.
+	// ErrDisconnected is returned when attempting to write to a disconnected
+	// client.
 	ErrDisconnected = errors.New("client is disconnected")
 )
 
@@ -72,8 +73,10 @@ type RealTimeBaseTranscript struct {
 	// The partial transcript for your audio
 	Text string `json:"text"`
 
-	// An array of objects, with the information for each word in the transcription text.
-	// Includes the start and end time of the word in milliseconds, the confidence score of the word, and the text, which is the word itself.
+	// An array of objects, with the information for each word in the
+	// transcription text. Includes the start and end time of the word in
+	// milliseconds, the confidence score of the word, and the text, which is
+	// the word itself.
 	Words []Word `json:"words"`
 }
 
@@ -116,8 +119,10 @@ var DefaultSampleRate = 16_000
 type RealTimeClient struct {
 	baseURL *url.URL
 	apiKey  string
+	token   string
 
-	conn *websocket.Conn
+	conn       *websocket.Conn
+	httpClient *http.Client
 
 	mtx         sync.RWMutex
 	sessionOpen bool
@@ -126,6 +131,10 @@ type RealTimeClient struct {
 	done chan bool
 
 	handler RealTimeHandler
+
+	sampleRate int
+	encoding   RealTimeEncoding
+	wordBoost  []string
 }
 
 func (c *RealTimeClient) isSessionOpen() bool {
@@ -148,7 +157,8 @@ type RealTimeError struct {
 
 type RealTimeClientOption func(*RealTimeClient)
 
-// WithRealTimeBaseURL sets the API endpoint used by the client. Mainly used for testing.
+// WithRealTimeBaseURL sets the API endpoint used by the client. Mainly used for
+// testing.
 func WithRealTimeBaseURL(rawurl string) RealTimeClientOption {
 	return func(c *RealTimeClient) {
 		if u, err := url.Parse(rawurl); err == nil {
@@ -157,9 +167,19 @@ func WithRealTimeBaseURL(rawurl string) RealTimeClientOption {
 	}
 }
 
+// WithRealTimeAuthToken configures the client to authenticate using an
+// AssemblyAI API key.
 func WithRealTimeAPIKey(apiKey string) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
 		rtc.apiKey = apiKey
+	}
+}
+
+// WithRealTimeAuthToken configures the client to authenticate using a temporary
+// token generated using [CreateTemporaryToken].
+func WithRealTimeAuthToken(token string) RealTimeClientOption {
+	return func(rtc *RealTimeClient) {
+		rtc.token = token
 	}
 }
 
@@ -171,24 +191,13 @@ func WithHandler(handler RealTimeHandler) RealTimeClientOption {
 
 func WithRealTimeSampleRate(sampleRate int) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
-		if sampleRate > 0 {
-			vs := rtc.baseURL.Query()
-			vs.Set("sample_rate", strconv.Itoa(sampleRate))
-			rtc.baseURL.RawQuery = vs.Encode()
-		}
+		rtc.sampleRate = sampleRate
 	}
 }
 
 func WithRealTimeWordBoost(wordBoost []string) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
-		vs := rtc.baseURL.Query()
-
-		if len(wordBoost) > 0 {
-			b, _ := json.Marshal(wordBoost)
-			vs.Set("word_boost", string(b))
-		}
-
-		rtc.baseURL.RawQuery = vs.Encode()
+		rtc.wordBoost = wordBoost
 	}
 }
 
@@ -205,25 +214,25 @@ const (
 
 func WithRealTimeEncoding(encoding RealTimeEncoding) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
-		vs := rtc.baseURL.Query()
-		vs.Set("encoding", string(encoding))
-		rtc.baseURL.RawQuery = vs.Encode()
+		rtc.encoding = encoding
 	}
 }
 
 func NewRealTimeClientWithOptions(options ...RealTimeClientOption) *RealTimeClient {
 	client := &RealTimeClient{
 		baseURL: &url.URL{
-			Scheme:   "wss",
-			Host:     "api.assemblyai.com",
-			Path:     "/v2/realtime/ws",
-			RawQuery: fmt.Sprintf("sample_rate=%v", DefaultSampleRate),
+			Scheme: "wss",
+			Host:   "api.assemblyai.com",
+			Path:   "/v2/realtime/ws",
 		},
+		httpClient: &http.Client{},
 	}
 
 	for _, option := range options {
 		option(client)
 	}
+
+	client.baseURL.RawQuery = client.queryFromOptions()
 
 	return client
 }
@@ -261,7 +270,6 @@ func NewRealTimeClient(apiKey string, handler RealTimeHandler) *RealTimeClient {
 // Closes the any open WebSocket connection in case of errors.
 func (c *RealTimeClient) Connect(ctx context.Context) error {
 	header := make(http.Header)
-	header.Set("Authorization", c.apiKey)
 
 	opts := &websocket.DialOptions{
 		HTTPHeader: header,
@@ -360,6 +368,33 @@ func (c *RealTimeClient) Connect(ctx context.Context) error {
 	return nil
 }
 
+func (c *RealTimeClient) queryFromOptions() string {
+	values := url.Values{}
+
+	// Temporary token
+	if c.token != "" {
+		values.Set("token", c.token)
+	}
+
+	// Sample rate
+	if c.sampleRate > 0 {
+		values.Set("sample_rate", strconv.Itoa(c.sampleRate))
+	}
+
+	// Encoding
+	if c.encoding != "" {
+		values.Set("encoding", string(c.encoding))
+	}
+
+	// Word boost
+	if len(c.wordBoost) > 0 {
+		b, _ := json.Marshal(c.wordBoost)
+		values.Set("word_boost", string(b))
+	}
+
+	return values.Encode()
+}
+
 // Disconnect sends the terminate_session message and waits for the server to
 // send a SessionTerminated message before closing the connection.
 func (c *RealTimeClient) Disconnect(ctx context.Context, waitForSessionTermination bool) error {
@@ -404,4 +439,31 @@ func (c *RealTimeClient) SetEndUtteranceSilenceThreshold(ctx context.Context, th
 	return wsjson.Write(ctx, c.conn, endUtteranceSilenceThreshold{
 		EndUtteranceSilenceThreshold: threshold,
 	})
+}
+
+// RealTimeService groups operations related to the real-time transcription.
+type RealTimeService struct {
+	client *Client
+}
+
+// CreateTemporaryToken creates a temporary token that can be used to
+// authenticate a real-time client.
+func (svc *RealTimeService) CreateTemporaryToken(ctx context.Context, expiresIn int64) (*RealtimeTemporaryTokenResponse, error) {
+	params := &CreateRealtimeTemporaryTokenParams{
+		ExpiresIn: Int64(expiresIn),
+	}
+
+	req, err := svc.client.newJSONRequest("POST", "/v2/realtime/token", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var tokenResponse RealtimeTemporaryTokenResponse
+	resp, err := svc.client.do(ctx, req, &tokenResponse)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return &tokenResponse, nil
 }

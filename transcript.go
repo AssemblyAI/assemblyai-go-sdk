@@ -20,7 +20,11 @@ const (
 )
 
 const (
+	// The Nano tier is a lightweight model that is optimized for speed and cost.
 	SpeechModelNano SpeechModel = "nano"
+
+	// Conformer-2 is a heavy-duty model optimized for accuracy.
+	SpeechModelConformer2 SpeechModel = "conformer-2"
 )
 
 // TranscriptService groups the operations related to transcribing audio.
