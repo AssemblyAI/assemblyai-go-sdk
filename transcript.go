@@ -20,7 +20,10 @@ const (
 )
 
 const (
-	// The Nano tier is a lightweight model that is optimized for speed and cost.
+	// The best model optimized for accuracy.
+	SpeechModelBest SpeechModel = "best"
+
+	// A lightweight, lower cost model for a wide range of languages.
 	SpeechModelNano SpeechModel = "nano"
 
 	// Conformer-2 is a heavy-duty model optimized for accuracy.
