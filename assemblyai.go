@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	version              = "1.4.0"
+	version              = "1.4.1"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
 	defaultUserAgent     = "assemblyai-go/" + version
