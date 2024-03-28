@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func setup() (*Client, *http.ServeMux, func()) {
@@ -17,29 +19,12 @@ func setup() (*Client, *http.ServeMux, func()) {
 	return client, handler, server.Close
 }
 
-func testMethod(t *testing.T, r *http.Request, want string) {
-	t.Helper()
-
-	if r.Method != want {
-		t.Errorf("Request method = %v, want = %v", r.Method, want)
-	}
-}
-
-func testQuery(t *testing.T, r *http.Request, want string) {
-	t.Helper()
-
-	if r.URL.RawQuery != want {
-		t.Errorf("Request query = %v, want = %v", r.URL.RawQuery, want)
-	}
-}
-
 func writeFileResponse(t *testing.T, w http.ResponseWriter, filename string) {
 	t.Helper()
 
 	b, err := os.ReadFile(filename)
-	if err != nil {
-		t.Errorf("ReadFile returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	w.Write(b)
+	_, err = w.Write(b)
+	require.NoError(t, err)
 }

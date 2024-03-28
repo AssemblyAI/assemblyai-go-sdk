@@ -6,18 +6,21 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLeMUR_Summarize(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/lemur/v3/generate/summary", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		var body LeMURSummaryParams
-		json.NewDecoder(r.Body).Decode(&body)
+		err := json.NewDecoder(r.Body).Decode(&body)
+		require.NoError(t, err)
 
 		want := LeMURSummaryParams{
 			LeMURBaseParams: LeMURBaseParams{
@@ -26,9 +29,7 @@ func TestLeMUR_Summarize(t *testing.T) {
 			},
 		}
 
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
-		}
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/lemur/summarize.json")
 	})
@@ -41,26 +42,23 @@ func TestLeMUR_Summarize(t *testing.T) {
 			Context:       "Additional context",
 		},
 	})
-	if err != nil {
-		t.Errorf("Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	want := lemurSummaryWildfires
-
-	if *response.Response != want {
-		t.Errorf("LeMUR.Summarize = %v, want = %v", response, want)
-	}
+	require.Equal(t, lemurSummaryWildfires, *response.Response)
 }
 
 func TestLeMUR_SummarizeWithStructContext(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/lemur/v3/generate/summary", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		var body LeMURSummaryParams
-		json.NewDecoder(r.Body).Decode(&body)
+		err := json.NewDecoder(r.Body).Decode(&body)
+		require.NoError(t, err)
 
 		want := LeMURSummaryParams{
 			LeMURBaseParams: LeMURBaseParams{
@@ -69,9 +67,7 @@ func TestLeMUR_SummarizeWithStructContext(t *testing.T) {
 			},
 		}
 
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
-		}
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/lemur/summarize.json")
 	})
@@ -84,26 +80,23 @@ func TestLeMUR_SummarizeWithStructContext(t *testing.T) {
 			Context:       map[string]interface{}{"key": "value"},
 		},
 	})
-	if err != nil {
-		t.Errorf("Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	want := lemurSummaryWildfires
-
-	if *response.Response != want {
-		t.Errorf("LeMUR.Summarize = %v, want = %v", response, want)
-	}
+	require.Equal(t, lemurSummaryWildfires, *response.Response)
 }
 
 func TestLeMUR_QuestionAnswer(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/lemur/v3/generate/question-answer", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		var body LeMURQuestionAnswerParams
-		json.NewDecoder(r.Body).Decode(&body)
+		err := json.NewDecoder(r.Body).Decode(&body)
+		require.NoError(t, err)
 
 		want := LeMURQuestionAnswerParams{
 			LeMURBaseParams: LeMURBaseParams{
@@ -114,9 +107,7 @@ func TestLeMUR_QuestionAnswer(t *testing.T) {
 			},
 		}
 
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
-		}
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/lemur/question-answer.json")
 	})
@@ -133,9 +124,7 @@ func TestLeMUR_QuestionAnswer(t *testing.T) {
 		},
 		Questions: questions,
 	})
-	if err != nil {
-		t.Errorf("Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	want := []LeMURQuestionAnswer{
 		{
@@ -144,20 +133,21 @@ func TestLeMUR_QuestionAnswer(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(answers.Response, want) {
-		t.Errorf("LeMUR.Question = %+v, want = %+v", answers, want)
-	}
+	require.Equal(t, want, answers.Response)
 }
 
 func TestLeMUR_ActionItems(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/lemur/v3/generate/action-items", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		var body LeMURActionItemsParams
-		json.NewDecoder(r.Body).Decode(&body)
+		err := json.NewDecoder(r.Body).Decode(&body)
+		require.NoError(t, err)
 
 		want := LeMURActionItemsParams{
 			LeMURBaseParams: LeMURBaseParams{
@@ -165,9 +155,7 @@ func TestLeMUR_ActionItems(t *testing.T) {
 			},
 		}
 
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
-		}
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/lemur/action-items.json")
 	})
@@ -179,18 +167,14 @@ func TestLeMUR_ActionItems(t *testing.T) {
 			TranscriptIDs: []string{"transcript_id"},
 		},
 	})
-	if err != nil {
-		t.Errorf("Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	want := lemurActionItemsWildfires
-
-	if *response.Response != want {
-		t.Errorf("LeMUR.ActionItems = %v, want = %v", response, want)
-	}
+	require.Equal(t, lemurActionItemsWildfires, *response.Response)
 }
 
 func TestLeMUR_Task(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
@@ -201,10 +185,11 @@ then get into the examples with feedback.
 `
 
 	handler.HandleFunc("/lemur/v3/generate/task", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		var body LeMURTaskParams
-		json.NewDecoder(r.Body).Decode(&body)
+		err := json.NewDecoder(r.Body).Decode(&body)
+		require.NoError(t, err)
 
 		want := LeMURTaskParams{
 			LeMURBaseParams: LeMURBaseParams{
@@ -213,9 +198,7 @@ then get into the examples with feedback.
 			Prompt: String(prompt),
 		}
 
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
-		}
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/lemur/task.json")
 	})
@@ -228,23 +211,19 @@ then get into the examples with feedback.
 		},
 		Prompt: String(prompt),
 	})
-	if err != nil {
-		t.Errorf("Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	want := lemurTaskWildfires
-
-	if *response.Response != want {
-		t.Errorf("LeMUR.ActionItems = %v, want = %v", response, want)
-	}
+	require.Equal(t, lemurTaskWildfires, *response.Response)
 }
 
 func TestLeMUR_PurgeRequestData(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/lemur/v3/23f1485d-b3ba-4bba-8910-c16085e1afa5", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "DELETE")
+		require.Equal(t, "DELETE", r.Method)
 
 		writeFileResponse(t, w, "testdata/lemur/purge-request-data.json")
 	})
@@ -252,11 +231,7 @@ func TestLeMUR_PurgeRequestData(t *testing.T) {
 	ctx := context.Background()
 
 	response, err := client.LeMUR.PurgeRequestData(ctx, "23f1485d-b3ba-4bba-8910-c16085e1afa5")
-	if err != nil {
-		t.Errorf("PurgeRequestData returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if !ToBool(response.Deleted) {
-		t.Errorf("LeMUR request was not deleted")
-	}
+	require.True(t, ToBool(response.Deleted))
 }

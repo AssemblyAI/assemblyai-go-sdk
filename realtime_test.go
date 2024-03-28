@@ -17,6 +17,8 @@ import (
 const testTimeout = 5 * time.Second
 
 func TestRealTime_Connect(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -65,6 +67,8 @@ func TestRealTime_Connect(t *testing.T) {
 }
 
 func TestRealTime_Send(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -120,6 +124,8 @@ func TestRealTime_Send(t *testing.T) {
 }
 
 func TestRealTime_Receive(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -175,6 +181,8 @@ func TestRealTime_Receive(t *testing.T) {
 }
 
 func TestRealTime_TerminateSessionOnDisconnect(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -212,6 +220,8 @@ func TestRealTime_TerminateSessionOnDisconnect(t *testing.T) {
 }
 
 func TestRealTime_ForceEndUtterance(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -251,6 +261,8 @@ func TestRealTime_ForceEndUtterance(t *testing.T) {
 }
 
 func TestRealTime_SetEndUtteranceSilenceThreshold(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -290,6 +302,8 @@ func TestRealTime_SetEndUtteranceSilenceThreshold(t *testing.T) {
 }
 
 func TestRealTime_TemporaryToken(t *testing.T) {
+	t.Parallel()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/v2/realtime/token" {
 			fmt.Fprintln(w, `{"token":"temp-token"}`)
