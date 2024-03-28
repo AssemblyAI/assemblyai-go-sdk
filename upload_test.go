@@ -7,25 +7,23 @@ import (
 	"io"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpload(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/v2/upload", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		b, err := io.ReadAll(r.Body)
-		if err != nil {
-			t.Error(err)
-		}
+		require.NoError(t, err)
 
-		want := "data"
-
-		if got := string(b); got != want {
-			t.Errorf("Request body = %+v, want = %+v", got, want)
-		}
+		require.Equal(t, "data", string(b))
 
 		fmt.Fprintf(w, "{\"upload_url\": %q}", fakeAudioURL)
 	})
@@ -35,13 +33,7 @@ func TestUpload(t *testing.T) {
 	buf := bytes.NewBufferString("data")
 
 	got, err := client.Upload(ctx, buf)
-	if err != nil {
-		t.Errorf("Upload returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	want := fakeAudioURL
-
-	if got != want {
-		t.Errorf("Upload URL = %v, want %v", got, want)
-	}
+	require.Equal(t, fakeAudioURL, got)
 }

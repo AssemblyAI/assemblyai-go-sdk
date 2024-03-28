@@ -2,38 +2,19 @@ package assemblyai
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
-
-var (
-	integration = flag.Bool("integration", false, "Enable integration tests.")
-	apiKey      = os.Getenv("ASSEMBLYAI_API_KEY")
-)
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	if *integration && apiKey == "" {
-		fmt.Println("missing api key")
-		os.Exit(1)
-	}
-
-	os.Exit(m.Run())
-}
-
-func isIntegration(t *testing.T) {
-	t.Helper()
-
-	if !*integration {
-		t.Skip("skipping integration test...")
-	}
-}
 
 func TestIntegration(t *testing.T) {
-	isIntegration(t)
+	t.Parallel()
+
+	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+	if apiKey == "" {
+		t.Skip("ASSEMBLYAI_API_KEY not set")
+	}
 
 	client := NewClient(apiKey)
 
@@ -43,45 +24,31 @@ func TestIntegration(t *testing.T) {
 
 	// Transcript
 	f, err := os.Open(path)
-	if err != nil {
-		t.Fatalf("os.Open returned error: %v", err)
-	}
+	require.NoError(t, err)
 	defer f.Close()
 
 	t.Logf("uploading %q...", path)
 
 	audioURL, err := client.Upload(ctx, f)
-	if err != nil {
-		t.Fatalf("Upload returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	t.Log("uploaded file")
 	t.Logf("submitting %q...", audioURL)
 
 	transcript, err := client.Transcripts.SubmitFromURL(ctx, audioURL, nil)
-	if err != nil {
-		t.Fatalf("Transcripts.Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if transcript.Status != TranscriptStatusQueued {
-		t.Fatalf("transcript.Status = %v, want %v", transcript.Status, err)
-	}
+	require.Equal(t, TranscriptStatusQueued, transcript.Status)
 
 	t.Log("submitted transcription")
 	t.Log("waiting for transcription...")
 
 	transcript, err = client.Transcripts.Wait(ctx, ToString(transcript.ID))
-	if err != nil {
-		t.Fatalf("Transcripts.Wait returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if transcript.Status != TranscriptStatusCompleted {
-		t.Errorf("transcript.Status = %v, want %v", transcript.Status, err)
-	}
+	require.Equal(t, TranscriptStatusCompleted, transcript.Status)
 
-	if *transcript.Text == "" {
-		t.Errorf("transcript is missing text")
-	}
+	require.NotEmpty(t, *transcript.Text)
 
 	t.Log("completed transcription")
 	t.Logf("transcript.Text = %v", ToString(transcript.Text))
@@ -95,9 +62,7 @@ func TestIntegration(t *testing.T) {
 			TranscriptIDs: []string{ToString(transcript.ID)},
 		},
 	})
-	if err != nil {
-		t.Fatalf("LeMUR.Summarize returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	t.Logf("LeMUR.Summarize = %v", ToString(response.Response))
 }

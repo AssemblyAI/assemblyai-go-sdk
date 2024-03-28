@@ -271,6 +271,10 @@ func NewRealTimeClient(apiKey string, handler RealTimeHandler) *RealTimeClient {
 func (c *RealTimeClient) Connect(ctx context.Context) error {
 	header := make(http.Header)
 
+	if c.apiKey != "" {
+		header.Set("Authorization", c.apiKey)
+	}
+
 	opts := &websocket.DialOptions{
 		HTTPHeader: header,
 		HTTPClient: &http.Client{},

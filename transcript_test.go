@@ -1,15 +1,15 @@
 package assemblyai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTranscripts_Submit(t *testing.T) {
@@ -17,28 +17,25 @@ func TestTranscripts_Submit(t *testing.T) {
 	defer teardown()
 
 	handler.HandleFunc("/v2/transcript", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		require.Equal(t, "POST", r.Method)
 
 		b, err := io.ReadAll(r.Body)
-		if err != nil {
-			t.Errorf("io.ReadAll returned error: %v", err)
-		}
+		require.NoError(t, err)
 
 		// Check that we're not marshaling zero values.
-		wantBody := `{"audio_url":"https://example.com/wildfires.mp3"}
-`
-		if string(b) != wantBody {
-			t.Errorf("Request body = %v, want = %v", string(b), wantBody)
-		}
+		wantBody := `{"audio_url":"https://example.com/wildfires.mp3"}`
+
+		require.Equal(t, wantBody, string(bytes.TrimSpace(b)))
 
 		var body TranscriptParams
-		json.Unmarshal(b, &body)
+		err = json.Unmarshal(b, &body)
+		require.NoError(t, err)
 
-		want := TranscriptParams{AudioURL: String(fakeAudioURL)}
-
-		if !cmp.Equal(body, want) {
-			t.Errorf("Request body = %+v, want = %+v", body, want)
+		want := TranscriptParams{
+			AudioURL: String(fakeAudioURL),
 		}
+
+		require.Equal(t, want, body)
 
 		writeFileResponse(t, w, "testdata/transcript/queued.json")
 	})
@@ -46,9 +43,7 @@ func TestTranscripts_Submit(t *testing.T) {
 	ctx := context.Background()
 
 	transcript, err := client.Transcripts.SubmitFromURL(ctx, fakeAudioURL, nil)
-	if err != nil {
-		t.Errorf("Transcripts.Submit returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	want := Transcript{
 		ID:            String(fakeTranscriptID),
@@ -84,9 +79,7 @@ func TestTranscripts_Submit(t *testing.T) {
 		IABCategoriesResult: TopicDetectionModelResult{},
 	}
 
-	if !cmp.Equal(transcript, want) {
-		t.Errorf(cmp.Diff(want, transcript))
-	}
+	require.Equal(t, want, transcript)
 }
 
 func TestTranscripts_Delete(t *testing.T) {
@@ -94,7 +87,7 @@ func TestTranscripts_Delete(t *testing.T) {
 	defer teardown()
 
 	handler.HandleFunc("/v2/transcript/"+fakeTranscriptID, func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "DELETE")
+		require.Equal(t, "DELETE", r.Method)
 
 		writeFileResponse(t, w, "testdata/transcript/deleted.json")
 	})
@@ -102,9 +95,7 @@ func TestTranscripts_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	transcript, err := client.Transcripts.Delete(ctx, fakeTranscriptID)
-	if err != nil {
-		t.Errorf("Transcripts.Delete returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	want := Transcript{
 		ID:            String(fakeTranscriptID),
@@ -127,17 +118,17 @@ func TestTranscripts_Delete(t *testing.T) {
 		WebhookAuth:       Bool(false),
 	}
 
-	if !cmp.Equal(transcript, want) {
-		t.Errorf(cmp.Diff(want, transcript))
-	}
+	require.Equal(t, want, transcript)
 }
 
 func TestTranscripts_Get(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/v2/transcript/"+fakeTranscriptID, func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
+		require.Equal(t, "GET", r.Method)
 
 		writeFileResponse(t, w, "testdata/transcript/completed.json")
 	})
@@ -145,27 +136,23 @@ func TestTranscripts_Get(t *testing.T) {
 	ctx := context.Background()
 
 	transcript, err := client.Transcripts.Get(ctx, fakeTranscriptID)
-	if err != nil {
-		t.Errorf("Transcripts.Get returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	b, err := os.ReadFile("testdata/transcript/wildfires.txt")
-	if err != nil {
-		t.Errorf("os.ReadFile returned error: %v", err)
-	}
+	require.NoError(t, err)
 
-	if *transcript.Text != strings.TrimSpace(string(b)) {
-		t.Errorf("transcript.Text = %v,\nwant = %v", transcript.Text, string(b))
-	}
+	require.Equal(t, string(bytes.TrimSpace(b)), *transcript.Text)
 }
 
 func TestTranscripts_List(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/v2/transcript", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		testQuery(t, r, "limit=2")
+		require.Equal(t, "GET", r.Method)
+		require.Equal(t, "limit=2", r.URL.RawQuery)
 
 		writeFileResponse(t, w, "testdata/transcript/list.json")
 	})
@@ -175,9 +162,7 @@ func TestTranscripts_List(t *testing.T) {
 	results, err := client.Transcripts.List(ctx, ListTranscriptParams{
 		Limit: Int64(2),
 	})
-	if err != nil {
-		t.Errorf("Transcripts.List returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	want := TranscriptList{
 		PageDetails: PageDetails{
@@ -207,18 +192,18 @@ func TestTranscripts_List(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(results, want) {
-		t.Errorf(cmp.Diff(want, results))
-	}
+	require.Equal(t, want, results)
 }
 
 func TestTranscripts_SearchWords(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
 	handler.HandleFunc("/v2/transcript/"+fakeTranscriptID+"/word-search", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		testQuery(t, r, "words=hopkins%2Cwildfires")
+		require.Equal(t, "GET", r.Method)
+		require.Equal(t, "words=hopkins%2Cwildfires", r.URL.RawQuery)
 
 		writeFileResponse(t, w, "testdata/transcript/word-search.json")
 	})
@@ -226,9 +211,7 @@ func TestTranscripts_SearchWords(t *testing.T) {
 	ctx := context.Background()
 
 	results, err := client.Transcripts.WordSearch(ctx, fakeTranscriptID, []string{"hopkins", "wildfires"})
-	if err != nil {
-		t.Errorf("Transcripts.WordSearch returned error: %v", err)
-	}
+	require.NoError(t, err)
 
 	want := WordSearchResponse{
 		ID: String("bfc3622e-8c69-4497-9a84-fb65b30dcb07"),
@@ -249,7 +232,5 @@ func TestTranscripts_SearchWords(t *testing.T) {
 		TotalCount: Int64(6),
 	}
 
-	if !cmp.Equal(results, want) {
-		t.Errorf(cmp.Diff(want, results))
-	}
+	require.Equal(t, want, results)
 }
