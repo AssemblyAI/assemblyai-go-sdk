@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"log/slog"
 
 	"github.com/AssemblyAI/assemblyai-go-sdk"
 	"github.com/gordonklaus/portaudio"
@@ -15,11 +16,11 @@ import (
 type realtimeHandler struct{}
 
 func (h *realtimeHandler) SessionBegins(event assemblyai.SessionBegins) {
-	fmt.Println("session begins")
+	slog.Info("session begins")
 }
 
 func (h *realtimeHandler) SessionTerminated(event assemblyai.SessionTerminated) {
-	fmt.Println("session terminated")
+	slog.Info("session terminated")
 }
 
 func (h *realtimeHandler) FinalTranscript(transcript assemblyai.FinalTranscript) {
@@ -31,74 +32,81 @@ func (h *realtimeHandler) PartialTranscript(transcript assemblyai.PartialTranscr
 }
 
 func (h *realtimeHandler) Error(err error) {
-	fmt.Println(err)
+	slog.Error("Something bad happened", "err", err)
 }
 
 func main() {
-	logger := log.New(os.Stderr, "", log.Lshortfile)
-
-	var (
-		apiKey = os.Getenv("ASSEMBLYAI_API_KEY")
-
-		// Number of samples per seconds.
-		sampleRate = 16000
-
-		// Number of samples to send at once.
-		framesPerBuffer = 3200
-	)
 
 	sigs := make(chan os.Signal, 1)
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
+	// We need portaudio to record the microphone.
+	err := portaudio.Initialize()
+	checkErr(err)
+	defer portaudio.Terminate()
+
+	var (
+		// Number of samples per seconds.
+		sampleRate = 16_000
+
+		// Number of samples to send at once.
+		framesPerBuffer = 3_200
+	)
+
 	var h realtimeHandler
 
-	client := assemblyai.NewRealTimeClient(apiKey, &h)
+	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+
+	client := assemblyai.NewRealTimeClientWithOptions(
+		assemblyai.WithRealTimeAPIKey(apiKey),
+		assemblyai.WithRealTimeSampleRate(int(sampleRate)),
+		assemblyai.WithHandler(&h),
+	)
 
 	ctx := context.Background()
 
-	if err := client.Connect(ctx); err != nil {
-		logger.Fatal(err)
-	}
+	err = client.Connect(ctx)
+	checkErr(err)
 
-	// We need portaudio to record the microphone.
-	portaudio.Initialize()
-	defer portaudio.Terminate()
+	slog.Info("connected to real-time API", "sample_rate", sampleRate, "frames_per_buffer", framesPerBuffer)
 
 	rec, err := newRecorder(sampleRate, framesPerBuffer)
-	if err != nil {
-		logger.Fatal(err)
-	}
+	checkErr(err)
 
-	if err := rec.Start(); err != nil {
-		logger.Fatal(err)
-	}
+	err = rec.Start()
+	checkErr(err)
+
+	slog.Info("recording...")
 
 	for {
-
 		select {
 		case <-sigs:
-			fmt.Println("stopping recording...")
+			slog.Info("stopping recording...")
 
-			if err := rec.Stop(); err != nil {
-				log.Fatal(err)
-			}
+			var err error
 
-			if err := client.Disconnect(ctx, true); err != nil {
-				log.Fatal(err)
-			}
+			err = rec.Stop()
+			checkErr(err)
+
+			err = client.Disconnect(ctx, true)
+			checkErr(err)
 
 			os.Exit(0)
 		default:
 			b, err := rec.Read()
-			if err != nil {
-				logger.Fatal(err)
-			}
+			checkErr(err)
 
 			// Send partial audio samples.
-			if err := client.Send(ctx, b); err != nil {
-				logger.Fatal(err)
-			}
+			err = client.Send(ctx, b)
+			checkErr(err)
 		}
+	}
+}
+
+func checkErr(err error) {
+	if err != nil {
+		slog.Error("Something bad happened", "err", err)
+		os.Exit(1)
 	}
 }
