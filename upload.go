@@ -12,7 +12,7 @@ import (
 //
 // https://www.assemblyai.com/docs/API%20reference/upload
 func (c *Client) Upload(ctx context.Context, data io.Reader) (string, error) {
-	req, err := c.newRequest("POST", "/v2/upload", data)
+	req, err := c.newRequest(ctx, "POST", "/v2/upload", data)
 	if err != nil {
 		return "", err
 	}
@@ -23,7 +23,7 @@ func (c *Client) Upload(ctx context.Context, data io.Reader) (string, error) {
 		UploadURL string `json:"upload_url"`
 	}
 
-	if _, err := c.do(ctx, req, &result); err != nil {
+	if _, err := c.do(req, &result); err != nil {
 		return "", err
 	}
 

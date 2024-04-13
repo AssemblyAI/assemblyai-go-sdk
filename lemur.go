@@ -35,12 +35,12 @@ type LeMURService struct {
 func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerParams) (LeMURQuestionAnswerResponse, error) {
 	var response LeMURQuestionAnswerResponse
 
-	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/question-answer", params)
+	req, err := s.client.newJSONRequest(ctx, "POST", "/lemur/v3/generate/question-answer", params)
 	if err != nil {
 		return LeMURQuestionAnswerResponse{}, err
 	}
 
-	if _, err := s.client.do(ctx, req, &response); err != nil {
+	if _, err := s.client.do(req, &response); err != nil {
 		return LeMURQuestionAnswerResponse{}, err
 	}
 
@@ -51,14 +51,14 @@ func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerP
 //
 // https://www.assemblyai.com/docs/Models/lemur#action-items
 func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParams) (LeMURSummaryResponse, error) {
-	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/summary", params)
+	req, err := s.client.newJSONRequest(ctx, "POST", "/lemur/v3/generate/summary", params)
 	if err != nil {
 		return LeMURSummaryResponse{}, err
 	}
 
 	var response LeMURSummaryResponse
 
-	if _, err := s.client.do(ctx, req, &response); err != nil {
+	if _, err := s.client.do(req, &response); err != nil {
 		return LeMURSummaryResponse{}, err
 	}
 
@@ -69,14 +69,14 @@ func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParams)
 //
 // https://www.assemblyai.com/docs/Models/lemur#action-items
 func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsParams) (LeMURActionItemsResponse, error) {
-	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/action-items", params)
+	req, err := s.client.newJSONRequest(ctx, "POST", "/lemur/v3/generate/action-items", params)
 	if err != nil {
 		return LeMURActionItemsResponse{}, err
 	}
 
 	var response LeMURActionItemsResponse
 
-	if _, err := s.client.do(ctx, req, &response); err != nil {
+	if _, err := s.client.do(req, &response); err != nil {
 		return LeMURActionItemsResponse{}, err
 	}
 
@@ -87,14 +87,14 @@ func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsP
 //
 // https://www.assemblyai.com/docs/Models/lemur#task
 func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParams) (LeMURTaskResponse, error) {
-	req, err := s.client.newJSONRequest("POST", "/lemur/v3/generate/task", params)
+	req, err := s.client.newJSONRequest(ctx, "POST", "/lemur/v3/generate/task", params)
 	if err != nil {
 		return LeMURTaskResponse{}, err
 	}
 
 	var response LeMURTaskResponse
 
-	if _, err := s.client.do(ctx, req, &response); err != nil {
+	if _, err := s.client.do(req, &response); err != nil {
 		return LeMURTaskResponse{}, err
 	}
 
@@ -102,14 +102,14 @@ func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParams) (LeMURT
 }
 
 func (s *LeMURService) PurgeRequestData(ctx context.Context, requestID string) (PurgeLeMURRequestDataResponse, error) {
-	req, err := s.client.newJSONRequest("DELETE", "/lemur/v3/"+requestID, nil)
+	req, err := s.client.newJSONRequest(ctx, "DELETE", "/lemur/v3/"+requestID, nil)
 	if err != nil {
 		return PurgeLeMURRequestDataResponse{}, err
 	}
 
 	var response PurgeLeMURRequestDataResponse
 
-	if _, err := s.client.do(ctx, req, &response); err != nil {
+	if _, err := s.client.do(req, &response); err != nil {
 		return PurgeLeMURRequestDataResponse{}, err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +14,8 @@ import (
 )
 
 func TestTranscripts_Submit(t *testing.T) {
+	t.Parallel()
+
 	client, handler, teardown := setup()
 	defer teardown()
 
@@ -233,4 +236,29 @@ func TestTranscripts_SearchWords(t *testing.T) {
 	}
 
 	require.Equal(t, want, results)
+}
+
+func TestAPIError(t *testing.T) {
+	t.Parallel()
+
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/v2/transcript", func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "POST", r.Method)
+
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, `{"error": "something bad happened"}`)
+	})
+
+	ctx := context.Background()
+
+	_, err := client.Transcripts.TranscribeFromURL(ctx, fakeAudioURL, nil)
+
+	require.IsType(t, APIError{}, err)
+
+	require.Equal(t, APIError{
+		Status:  http.StatusBadRequest,
+		Message: "something bad happened",
+	}, err)
 }
