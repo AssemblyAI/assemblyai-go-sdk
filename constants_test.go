@@ -1,7 +1,9 @@
 package assemblyai
 
-const fakeAudioURL = "https://example.com/wildfires.mp3"
-const fakeTranscriptID = "TRANSCRIPT_ID"
+const (
+	fakeAudioURL     = "https://example.com/wildfires.mp3"
+	fakeTranscriptID = "TRANSCRIPT_ID"
+)
 
 const (
 	lemurSummaryWildfires     = "Wildfires in Canada are causing poor air quality and health issues in parts of the US. Weather systems are channeling smoke into the Mid-Atlantic and Northeast. The smoke contains high levels of particulate matter, microscopic particles that can harm health. Concentrations of particulate matter have reached up to 10 times the annual average and 4 times the 24-hour limit. Exposure can lead to respiratory, cardiovascular and neurological issues, especially in vulnerable groups like children, the elderly, and those with preexisting conditions. \n\nThe impacts will shift over the next few days as weather changes. The fires may continue for some time but the smoke should move away from the current affected areas. Climate change is projected to lead to longer fire seasons, more frequent fires, and more widespread air quality issues, though the Eastern US has been less affected historically."

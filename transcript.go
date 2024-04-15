@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,12 +51,12 @@ func (s *TranscriptService) SubmitFromURL(ctx context.Context, audioURL string, 
 		params.TranscriptOptionalParams = *opts
 	}
 
-	req, err := s.client.newJSONRequest("POST", "/v2/transcript", params)
+	req, err := s.client.newJSONRequest(ctx, "POST", "/v2/transcript", params)
 	if err != nil {
 		return Transcript{}, err
 	}
 
-	resp, err := s.client.do(ctx, req, &transcript)
+	resp, err := s.client.do(req, &transcript)
 	if err != nil {
 		return Transcript{}, err
 	}
@@ -78,14 +79,14 @@ func (s *TranscriptService) SubmitFromReader(ctx context.Context, reader io.Read
 //
 // https://www.assemblyai.com/docs/API%20reference/listing_and_deleting#deleting-transcripts-from-the-api
 func (s *TranscriptService) Delete(ctx context.Context, transcriptID string) (Transcript, error) {
-	req, err := s.client.newJSONRequest("DELETE", fmt.Sprint("/v2/transcript/", transcriptID), nil)
+	req, err := s.client.newJSONRequest(ctx, "DELETE", fmt.Sprint("/v2/transcript/", transcriptID), nil)
 	if err != nil {
 		return Transcript{}, err
 	}
 
 	var transcript Transcript
 
-	resp, err := s.client.do(ctx, req, &transcript)
+	resp, err := s.client.do(req, &transcript)
 	if err != nil {
 		return Transcript{}, err
 	}
@@ -98,14 +99,14 @@ func (s *TranscriptService) Delete(ctx context.Context, transcriptID string) (Tr
 //
 // https://www.assemblyai.com/docs/API%20reference/transcript
 func (s *TranscriptService) Get(ctx context.Context, transcriptID string) (Transcript, error) {
-	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID), nil)
+	req, err := s.client.newJSONRequest(ctx, "GET", fmt.Sprint("/v2/transcript/", transcriptID), nil)
 	if err != nil {
 		return Transcript{}, err
 	}
 
 	var transcript Transcript
 
-	resp, err := s.client.do(ctx, req, &transcript)
+	resp, err := s.client.do(req, &transcript)
 	if err != nil {
 		return Transcript{}, err
 	}
@@ -116,14 +117,14 @@ func (s *TranscriptService) Get(ctx context.Context, transcriptID string) (Trans
 
 // GetSentences returns the sentences for a transcript.
 func (s *TranscriptService) GetSentences(ctx context.Context, transcriptID string) (SentencesResponse, error) {
-	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID, "/sentences"), nil)
+	req, err := s.client.newJSONRequest(ctx, "GET", fmt.Sprint("/v2/transcript/", transcriptID, "/sentences"), nil)
 	if err != nil {
 		return SentencesResponse{}, err
 	}
 
 	var results SentencesResponse
 
-	resp, err := s.client.do(ctx, req, &results)
+	resp, err := s.client.do(req, &results)
 	if err != nil {
 		return SentencesResponse{}, err
 	}
@@ -134,14 +135,14 @@ func (s *TranscriptService) GetSentences(ctx context.Context, transcriptID strin
 
 // GetParagraphs returns the paragraphs for a transcript.
 func (s *TranscriptService) GetParagraphs(ctx context.Context, transcriptID string) (ParagraphsResponse, error) {
-	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID, "/paragraphs"), nil)
+	req, err := s.client.newJSONRequest(ctx, "GET", fmt.Sprint("/v2/transcript/", transcriptID, "/paragraphs"), nil)
 	if err != nil {
 		return ParagraphsResponse{}, err
 	}
 
 	var results ParagraphsResponse
 
-	resp, err := s.client.do(ctx, req, &results)
+	resp, err := s.client.do(req, &results)
 	if err != nil {
 		return ParagraphsResponse{}, err
 	}
@@ -154,14 +155,14 @@ func (s *TranscriptService) GetParagraphs(ctx context.Context, transcriptID stri
 //
 // https://www.assemblyai.com/docs/Models/pii_redaction#create-a-redacted-audio-file
 func (s *TranscriptService) GetRedactedAudio(ctx context.Context, transcriptID string) (RedactedAudioResponse, error) {
-	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID, "/redacted-audio"), nil)
+	req, err := s.client.newJSONRequest(ctx, "GET", fmt.Sprint("/v2/transcript/", transcriptID, "/redacted-audio"), nil)
 	if err != nil {
 		return RedactedAudioResponse{}, err
 	}
 
 	var audio RedactedAudioResponse
 
-	resp, err := s.client.do(ctx, req, &audio)
+	resp, err := s.client.do(req, &audio)
 	if err != nil {
 		return RedactedAudioResponse{}, err
 	}
@@ -175,18 +176,18 @@ type TranscriptGetSubtitlesOptions struct {
 }
 
 func (s *TranscriptService) GetSubtitles(ctx context.Context, transcriptID string, format SubtitleFormat, opts *TranscriptGetSubtitlesOptions) ([]byte, error) {
-	req, err := s.client.newRequest("GET", fmt.Sprintf("/v2/transcript/%s/%s", transcriptID, format), nil)
+	req, err := s.client.newRequest(ctx, "GET", fmt.Sprintf("/v2/transcript/%s/%s", transcriptID, format), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	if opts != nil {
 		values := make(url.Values)
-		values.Set("chars_per_caption", fmt.Sprint(opts.CharsPerCaption))
+		values.Set("chars_per_caption", strconv.FormatInt(opts.CharsPerCaption, 10))
 		req.URL.RawQuery = values.Encode()
 	}
 
-	resp, err := s.client.do(ctx, req, nil)
+	resp, err := s.client.do(req, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +200,7 @@ func (s *TranscriptService) GetSubtitles(ctx context.Context, transcriptID strin
 //
 // https://www.assemblyai.com/docs/API%20reference/listing_and_deleting#listing-historical-transcripts
 func (s *TranscriptService) List(ctx context.Context, options ListTranscriptParams) (TranscriptList, error) {
-	req, err := s.client.newJSONRequest("GET", "/v2/transcript", options)
+	req, err := s.client.newJSONRequest(ctx, "GET", "/v2/transcript", options)
 	if err != nil {
 		return TranscriptList{}, err
 	}
@@ -212,7 +213,7 @@ func (s *TranscriptService) List(ctx context.Context, options ListTranscriptPara
 
 	var results TranscriptList
 
-	resp, err := s.client.do(ctx, req, &results)
+	resp, err := s.client.do(req, &results)
 	if err != nil {
 		return TranscriptList{}, err
 	}
@@ -269,19 +270,18 @@ func (s *TranscriptService) WordSearch(ctx context.Context, transcriptID string,
 	values := url.Values{}
 	values.Set("words", strings.Join(words, ","))
 
-	req, err := s.client.newJSONRequest("GET", fmt.Sprint("/v2/transcript/", transcriptID, "/word-search?", values.Encode()), nil)
+	req, err := s.client.newJSONRequest(ctx, "GET", fmt.Sprint("/v2/transcript/", transcriptID, "/word-search?", values.Encode()), nil)
 	if err != nil {
 		return WordSearchResponse{}, err
 	}
 
 	var results WordSearchResponse
 
-	resp, err := s.client.do(ctx, req, &results)
+	resp, err := s.client.do(req, &results)
 	if err != nil {
 		return WordSearchResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	return results, nil
-
 }

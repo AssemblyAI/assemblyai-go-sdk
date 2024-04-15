@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	version              = "1.4.1"
+	version              = "1.5.0"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
 	defaultUserAgent     = "assemblyai-go/" + version
@@ -95,7 +95,7 @@ func WithAPIKey(key string) ClientOption {
 	}
 }
 
-func (c *Client) newJSONRequest(method, path string, body interface{}) (*http.Request, error) {
+func (c *Client) newJSONRequest(ctx context.Context, method, path string, body interface{}) (*http.Request, error) {
 	var buf io.ReadWriter
 
 	if body != nil {
@@ -106,7 +106,7 @@ func (c *Client) newJSONRequest(method, path string, body interface{}) (*http.Re
 		}
 	}
 
-	req, err := c.newRequest(method, path, buf)
+	req, err := c.newRequest(ctx, method, path, buf)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (c *Client) newJSONRequest(method, path string, body interface{}) (*http.Re
 	return req, nil
 }
 
-func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, method, path string, body io.Reader) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 
 	rawurl := c.baseURL.ResolveReference(rel).String()
 
-	req, err := http.NewRequest(method, rawurl, body)
+	req, err := http.NewRequestWithContext(ctx, method, rawurl, body)
 	if err != nil {
 		return nil, err
 	}
@@ -137,11 +137,12 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 	return req, err
 }
 
-func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) (*http.Response, error) {
-	resp, err := c.httpClient.Do(req.WithContext(ctx))
+func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		var apierr APIError

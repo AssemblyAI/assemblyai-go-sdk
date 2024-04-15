@@ -26,10 +26,11 @@ var (
 type MessageType string
 
 const (
-	MessageTypeSessionBegins     MessageType = "SessionBegins"
-	MessageTypeSessionTerminated MessageType = "SessionTerminated"
-	MessageTypePartialTranscript MessageType = "PartialTranscript"
-	MessageTypeFinalTranscript   MessageType = "FinalTranscript"
+	MessageTypeSessionBegins      MessageType = "SessionBegins"
+	MessageTypeSessionTerminated  MessageType = "SessionTerminated"
+	MessageTypePartialTranscript  MessageType = "PartialTranscript"
+	MessageTypeFinalTranscript    MessageType = "FinalTranscript"
+	MessageTypeSessionInformation MessageType = "SessionInformation"
 )
 
 type AudioData struct {
@@ -130,11 +131,13 @@ type RealTimeClient struct {
 	// done is used to clean up resources when the client disconnects.
 	done chan bool
 
-	handler RealTimeHandler
+	transcriber *RealTimeTranscriber
 
-	sampleRate int
-	encoding   RealTimeEncoding
-	wordBoost  []string
+	sampleRate                int
+	encoding                  RealTimeEncoding
+	wordBoost                 []string
+	disablePartialTranscripts bool
+	enableExtraSessionInfo    bool
 }
 
 func (c *RealTimeClient) isSessionOpen() bool {
@@ -183,21 +186,47 @@ func WithRealTimeAuthToken(token string) RealTimeClientOption {
 	}
 }
 
+// WithHandler configures the client to use the provided handler to handle
+// real-time events.
+//
+// Deprecated: WithHandler is deprecated. Use [WithRealTimeTranscriber] instead.
 func WithHandler(handler RealTimeHandler) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
-		rtc.handler = handler
+		rtc.transcriber = &RealTimeTranscriber{
+			OnSessionBegins:     handler.SessionBegins,
+			OnSessionTerminated: handler.SessionTerminated,
+			OnPartialTranscript: handler.PartialTranscript,
+			OnFinalTranscript:   handler.FinalTranscript,
+			OnError:             handler.Error,
+		}
 	}
 }
 
+func WithRealTimeTranscriber(transcriber *RealTimeTranscriber) RealTimeClientOption {
+	return func(rtc *RealTimeClient) {
+		rtc.transcriber = transcriber
+	}
+}
+
+// WithRealTimeSampleRate sets the sample rate for the audio data. Default is
+// 16000.
 func WithRealTimeSampleRate(sampleRate int) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
 		rtc.sampleRate = sampleRate
 	}
 }
 
+// WithRealTimeWordBoost sets the word boost for the real-time transcription.
 func WithRealTimeWordBoost(wordBoost []string) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
 		rtc.wordBoost = wordBoost
+	}
+}
+
+// WithRealTimeDisablePartialTranscripts disables partial transcripts during real-time transcription.
+func WithRealTimeDisablePartialTranscripts(disable bool) RealTimeClientOption {
+	return func(rtc *RealTimeClient) {
+		rtc.disablePartialTranscripts = disable
 	}
 }
 
@@ -212,12 +241,14 @@ const (
 	RealTimeEncodingPCMMulaw RealTimeEncoding = "pcm_mulaw"
 )
 
+// WithRealTimeEncoding specifies the encoding of the audio data.
 func WithRealTimeEncoding(encoding RealTimeEncoding) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
 		rtc.encoding = encoding
 	}
 }
 
+// NewRealTimeClientWithOptions returns a new instance of [RealTimeClient].
 func NewRealTimeClientWithOptions(options ...RealTimeClientOption) *RealTimeClient {
 	client := &RealTimeClient{
 		baseURL: &url.URL{
@@ -239,6 +270,7 @@ func NewRealTimeClientWithOptions(options ...RealTimeClientOption) *RealTimeClie
 
 type SessionBegins struct {
 	RealTimeBaseMessage
+
 	// Timestamp when this session will expire
 	ExpiresAt string `json:"expires_at"`
 
@@ -249,11 +281,19 @@ type SessionBegins struct {
 	SessionID string `json:"session_id"`
 }
 
+type SessionInformation struct {
+	RealTimeBaseMessage
+
+	// The duration of the audio in seconds.
+	AudioDurationSeconds float64 `json:"audio_duration_seconds"`
+}
+
 type SessionTerminated struct {
 	// Describes the type of the message
 	MessageType MessageType `json:"message_type"`
 }
 
+// Deprecated.
 type RealTimeHandler interface {
 	SessionBegins(ev SessionBegins)
 	SessionTerminated(ev SessionTerminated)
@@ -262,8 +302,19 @@ type RealTimeHandler interface {
 	Error(err error)
 }
 
+// NewRealTimeClient returns a new instance of [RealTimeClient] with default
+// values. Use [NewRealTimeClientWithOptions] for more configuration options.
 func NewRealTimeClient(apiKey string, handler RealTimeHandler) *RealTimeClient {
 	return NewRealTimeClientWithOptions(WithRealTimeAPIKey(apiKey), WithHandler(handler))
+}
+
+type RealTimeTranscriber struct {
+	OnSessionBegins      func(event SessionBegins)
+	OnSessionTerminated  func(event SessionTerminated)
+	OnSessionInformation func(event SessionInformation)
+	OnPartialTranscript  func(event PartialTranscript)
+	OnFinalTranscript    func(event FinalTranscript)
+	OnError              func(err error)
 }
 
 // Connects opens a WebSocket connection and waits for a session to begin.
@@ -306,7 +357,10 @@ func (c *RealTimeClient) Connect(ctx context.Context) error {
 	}
 
 	c.setSessionOpen(true)
-	c.handler.SessionBegins(session)
+
+	if c.transcriber.OnSessionBegins != nil {
+		c.transcriber.OnSessionBegins(session)
+	}
 
 	c.done = make(chan bool)
 
@@ -319,7 +373,9 @@ func (c *RealTimeClient) Connect(ctx context.Context) error {
 			var msg json.RawMessage
 
 			if err := wsjson.Read(ctx, c.conn, &msg); err != nil {
-				c.handler.Error(err)
+				if c.transcriber.OnError != nil {
+					c.transcriber.OnError(err)
+				}
 				return
 			}
 
@@ -328,7 +384,9 @@ func (c *RealTimeClient) Connect(ctx context.Context) error {
 			}
 
 			if err := json.Unmarshal(msg, &messageType); err != nil {
-				c.handler.Error(err)
+				if c.transcriber.OnError != nil {
+					c.transcriber.OnError(err)
+				}
 				return
 			}
 
@@ -336,35 +394,55 @@ func (c *RealTimeClient) Connect(ctx context.Context) error {
 			case MessageTypeFinalTranscript:
 				var transcript FinalTranscript
 				if err := json.Unmarshal(msg, &transcript); err != nil {
-					c.handler.Error(err)
+					if c.transcriber.OnError != nil {
+						c.transcriber.OnError(err)
+					}
 					continue
 				}
 
-				if transcript.Text != "" {
-					c.handler.FinalTranscript(transcript)
+				if transcript.Text != "" && c.transcriber.OnFinalTranscript != nil {
+					c.transcriber.OnFinalTranscript(transcript)
 				}
 			case MessageTypePartialTranscript:
 				var transcript PartialTranscript
 				if err := json.Unmarshal(msg, &transcript); err != nil {
-					c.handler.Error(err)
+					if c.transcriber.OnError != nil {
+						c.transcriber.OnError(err)
+					}
 					continue
 				}
 
-				if transcript.Text != "" {
-					c.handler.PartialTranscript(transcript)
+				if transcript.Text != "" && c.transcriber.OnPartialTranscript != nil {
+					c.transcriber.OnPartialTranscript(transcript)
 				}
 			case MessageTypeSessionTerminated:
 				var session SessionTerminated
 				if err := json.Unmarshal(msg, &session); err != nil {
-					c.handler.Error(err)
+					if c.transcriber.OnError != nil {
+						c.transcriber.OnError(err)
+					}
 					continue
 				}
 
 				c.setSessionOpen(false)
 
-				c.handler.SessionTerminated(session)
+				if c.transcriber.OnSessionTerminated != nil {
+					c.transcriber.OnSessionTerminated(session)
+				}
 
 				c.done <- true
+			case MessageTypeSessionInformation:
+				var info SessionInformation
+				if err := json.Unmarshal(msg, &info); err != nil {
+					if c.transcriber.OnError != nil {
+						c.transcriber.OnError(err)
+					}
+					continue
+				}
+
+				if c.transcriber.OnSessionInformation != nil {
+					c.transcriber.OnSessionInformation(info)
+				}
 			}
 		}
 	}()
@@ -394,6 +472,16 @@ func (c *RealTimeClient) queryFromOptions() string {
 	if len(c.wordBoost) > 0 {
 		b, _ := json.Marshal(c.wordBoost)
 		values.Set("word_boost", string(b))
+	}
+
+	// Disable partial transcripts
+	if c.disablePartialTranscripts {
+		values.Set("disable_partial_transcripts", "true")
+	}
+
+	// Extra session information.
+	if c.transcriber.OnSessionInformation != nil {
+		values.Set("enable_extra_session_information", "true")
 	}
 
 	return values.Encode()
@@ -457,13 +545,13 @@ func (svc *RealTimeService) CreateTemporaryToken(ctx context.Context, expiresIn 
 		ExpiresIn: Int64(expiresIn),
 	}
 
-	req, err := svc.client.newJSONRequest("POST", "/v2/realtime/token", params)
+	req, err := svc.client.newJSONRequest(ctx, "POST", "/v2/realtime/token", params)
 	if err != nil {
 		return nil, err
 	}
 
 	var tokenResponse RealtimeTemporaryTokenResponse
-	resp, err := svc.client.do(ctx, req, &tokenResponse)
+	resp, err := svc.client.do(req, &tokenResponse)
 	if err != nil {
 		return nil, err
 	}
