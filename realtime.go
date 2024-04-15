@@ -137,7 +137,6 @@ type RealTimeClient struct {
 	encoding                  RealTimeEncoding
 	wordBoost                 []string
 	disablePartialTranscripts bool
-	enableExtraSessionInfo    bool
 }
 
 func (c *RealTimeClient) isSessionOpen() bool {
