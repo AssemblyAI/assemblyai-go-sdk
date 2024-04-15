@@ -52,7 +52,7 @@ func TestRealTime_Handler(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		err = terminateSession(context.WithoutCancel(ctx), conn)
+		err = terminateSession(ctx, conn)
 		require.NoError(t, err)
 	}))
 	defer ts.Close()
