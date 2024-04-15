@@ -190,7 +190,6 @@ func TestRealTime_Send(t *testing.T) {
 		WithRealTimeWordBoost([]string{"foo", "bar"}),
 		WithRealTimeEncoding(RealTimeEncodingPCMMulaw),
 		WithRealTimeSampleRate(8_000),
-		WithRealTimeDisablePartialTranscripts(true),
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
@@ -478,4 +477,83 @@ func upgradeRequest(w http.ResponseWriter, r *http.Request) (*websocket.Conn, fu
 	return conn, func() error {
 		return conn.Close(websocket.StatusInternalError, "websocket closed unexpectedly")
 	}
+}
+
+func TestRealTime_DisablePartialTranscriptsIfNoCallback(t *testing.T) {
+	t.Parallel()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		conn, teardown := upgradeRequest(w, r)
+		defer teardown()
+
+		disablePartialTranscripts := r.URL.Query().Get("disable_partial_transcripts")
+		require.Equal(t, "true", disablePartialTranscripts)
+
+		var err error
+
+		err = beginSession(ctx, conn)
+		require.NoError(t, err)
+
+		err = terminateSession(ctx, conn)
+		require.NoError(t, err)
+	}))
+	defer ts.Close()
+
+	client := NewRealTimeClientWithOptions(
+		WithRealTimeBaseURL(ts.URL),
+		WithRealTimeTranscriber(&RealTimeTranscriber{}),
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	var err error
+
+	err = client.Connect(ctx)
+	require.NoError(t, err)
+
+	err = client.Disconnect(ctx, true)
+	require.NoError(t, err)
+}
+
+func TestRealTime_EnablePartialTranscriptsIfCallback(t *testing.T) {
+	t.Parallel()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		conn, teardown := upgradeRequest(w, r)
+		defer teardown()
+
+		require.False(t, r.URL.Query().Has("disable_partial_transcripts"))
+
+		var err error
+
+		err = beginSession(ctx, conn)
+		require.NoError(t, err)
+
+		err = terminateSession(ctx, conn)
+		require.NoError(t, err)
+	}))
+	defer ts.Close()
+
+	client := NewRealTimeClientWithOptions(
+		WithRealTimeBaseURL(ts.URL),
+		WithRealTimeTranscriber(&RealTimeTranscriber{
+			OnPartialTranscript: func(_ PartialTranscript) {},
+		}),
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	var err error
+
+	err = client.Connect(ctx)
+	require.NoError(t, err)
+
+	err = client.Disconnect(ctx, true)
+	require.NoError(t, err)
 }

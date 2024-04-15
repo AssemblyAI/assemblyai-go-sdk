@@ -156,7 +156,6 @@ func TestIntegration_RealTime_WithoutPartialTranscripts(t *testing.T) {
 			},
 		}),
 		WithRealTimeSampleRate(sampleRate),
-		WithRealTimeDisablePartialTranscripts(true),
 	)
 
 	ctx := context.Background()
@@ -217,7 +216,6 @@ func TestIntegration_RealTime_WithExtraSessionInfo(t *testing.T) {
 			},
 		}),
 		WithRealTimeSampleRate(sampleRate),
-		WithRealTimeDisablePartialTranscripts(true),
 	)
 
 	ctx := context.Background()
