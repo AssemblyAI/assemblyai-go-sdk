@@ -1,0 +1,22 @@
+linters:
+  presets:
+    - comment
+    - format
+    - import
+    - metalinter
+    - module
+    - unused
+  disable:
+    - dupword
+    - godot
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - nhooyr.io/websocket
+          - github.com/google
+          - github.com/stretchr/testify
+          - github.com/cenkalti/backoff
