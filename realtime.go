@@ -133,10 +133,9 @@ type RealTimeClient struct {
 
 	transcriber *RealTimeTranscriber
 
-	sampleRate                int
-	encoding                  RealTimeEncoding
-	wordBoost                 []string
-	disablePartialTranscripts bool
+	sampleRate int
+	encoding   RealTimeEncoding
+	wordBoost  []string
 }
 
 func (c *RealTimeClient) isSessionOpen() bool {
@@ -219,13 +218,6 @@ func WithRealTimeSampleRate(sampleRate int) RealTimeClientOption {
 func WithRealTimeWordBoost(wordBoost []string) RealTimeClientOption {
 	return func(rtc *RealTimeClient) {
 		rtc.wordBoost = wordBoost
-	}
-}
-
-// WithRealTimeDisablePartialTranscripts disables partial transcripts during real-time transcription.
-func WithRealTimeDisablePartialTranscripts(disable bool) RealTimeClientOption {
-	return func(rtc *RealTimeClient) {
-		rtc.disablePartialTranscripts = disable
 	}
 }
 
@@ -474,7 +466,7 @@ func (c *RealTimeClient) queryFromOptions() string {
 	}
 
 	// Disable partial transcripts
-	if c.disablePartialTranscripts {
+	if c.transcriber.OnPartialTranscript == nil {
 		values.Set("disable_partial_transcripts", "true")
 	}
 
