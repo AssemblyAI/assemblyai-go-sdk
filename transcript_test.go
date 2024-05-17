@@ -1,6 +1,7 @@
 package assemblyai
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -236,6 +237,43 @@ func TestTranscripts_SearchWords(t *testing.T) {
 	}
 
 	require.Equal(t, want, results)
+}
+
+func TestTranscripts_GetSubtitles(t *testing.T) {
+	t.Parallel()
+
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/v2/transcript/"+fakeTranscriptID+"/srt", func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "GET", r.Method)
+		require.Equal(t, "chars_per_caption=60", r.URL.RawQuery)
+
+		writeFileResponse(t, w, "testdata/transcript/subtitles.srt")
+	})
+
+	ctx := context.Background()
+
+	st, err := client.Transcripts.GetSubtitles(ctx, fakeTranscriptID, "srt", &TranscriptGetSubtitlesOptions{
+		CharsPerCaption: 60,
+	})
+	require.NoError(t, err)
+
+	r := bufio.NewReader(bytes.NewReader(st))
+
+	var line []byte
+
+	line, _, err = r.ReadLine()
+	require.NoError(t, err)
+	require.Equal(t, []byte("1"), line)
+
+	line, _, err = r.ReadLine()
+	require.NoError(t, err)
+	require.Equal(t, []byte("00:00:05,400 --> 00:00:12,550"), line)
+
+	line, _, err = r.ReadLine()
+	require.NoError(t, err)
+	require.Equal(t, []byte("Runner's knee runner's"), line)
 }
 
 func TestAPIError(t *testing.T) {

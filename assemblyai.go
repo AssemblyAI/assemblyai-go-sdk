@@ -157,7 +157,12 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	}
 
 	if v != nil {
-		err = json.NewDecoder(resp.Body).Decode(v)
+		switch val := v.(type) {
+		case *[]byte:
+			*val, err = io.ReadAll(resp.Body)
+		default:
+			err = json.NewDecoder(resp.Body).Decode(v)
+		}
 	}
 
 	return resp, err
