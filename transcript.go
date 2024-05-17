@@ -187,13 +187,15 @@ func (s *TranscriptService) GetSubtitles(ctx context.Context, transcriptID strin
 		req.URL.RawQuery = values.Encode()
 	}
 
-	resp, err := s.client.do(req, nil)
+	var res []byte
+
+	resp, err := s.client.do(req, &res)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	return io.ReadAll(resp.Body)
+	return res, nil
 }
 
 // List returns a collection of transcripts based on a filter.

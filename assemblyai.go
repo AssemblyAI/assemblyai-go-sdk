@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -11,10 +12,9 @@ import (
 )
 
 const (
-	version              = "1.5.0"
+	version              = "1.5.1"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
-	defaultUserAgent     = "assemblyai-go/" + version
 )
 
 // Client manages the communication with the AssemblyAI API.
@@ -41,7 +41,7 @@ func NewClientWithOptions(opts ...ClientOption) *Client {
 			Scheme: defaultBaseURLScheme,
 			Host:   defaultBaseURLHost,
 		},
-		userAgent:  defaultUserAgent,
+		userAgent:  fmt.Sprintf("AssemblyAI/1.0 (sdk=Go/%s)", version),
 		httpClient: &http.Client{},
 		apiKey:     defaultAPIKey,
 	}
@@ -157,7 +157,12 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	}
 
 	if v != nil {
-		err = json.NewDecoder(resp.Body).Decode(v)
+		switch val := v.(type) {
+		case *[]byte:
+			*val, err = io.ReadAll(resp.Body)
+		default:
+			err = json.NewDecoder(resp.Body).Decode(v)
+		}
 	}
 
 	return resp, err
