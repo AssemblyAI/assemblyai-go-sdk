@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"log/slog"
 
 	"github.com/AssemblyAI/assemblyai-go-sdk"
 	"github.com/gordonklaus/portaudio"
@@ -35,6 +36,7 @@ func (h *realtimeHandler) Error(err error) {
 }
 
 func main() {
+
 	sigs := make(chan os.Signal, 1)
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
