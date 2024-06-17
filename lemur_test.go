@@ -235,3 +235,25 @@ func TestLeMUR_PurgeRequestData(t *testing.T) {
 
 	require.True(t, ToBool(response.Deleted))
 }
+
+func TestLeMUR_GetResponseData(t *testing.T) {
+	t.Parallel()
+
+	client, handler, teardown := setup()
+	defer teardown()
+
+	handler.HandleFunc("/lemur/v3/23f1485d-b3ba-4bba-8910-c16085e1afa5", func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "GET", r.Method)
+
+		writeFileResponse(t, w, "testdata/lemur/task.json")
+	})
+
+	ctx := context.Background()
+
+	var response LeMURTaskResponse
+
+	err := client.LeMUR.GetResponseData(ctx, "23f1485d-b3ba-4bba-8910-c16085e1afa5", &response)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, response.Response)
+}
