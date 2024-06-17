@@ -115,3 +115,17 @@ func (s *LeMURService) PurgeRequestData(ctx context.Context, requestID string) (
 
 	return response, nil
 }
+
+// Retrieve a previously generated LeMUR response.
+func (s *LeMURService) GetResponseData(ctx context.Context, requestID string, response interface{}) error {
+	req, err := s.client.newJSONRequest(ctx, "GET", "/lemur/v3/"+requestID, nil)
+	if err != nil {
+		return err
+	}
+
+	if _, err := s.client.do(req, response); err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -12,28 +12,6 @@ import (
 	"github.com/gordonklaus/portaudio"
 )
 
-type realtimeHandler struct{}
-
-func (h *realtimeHandler) SessionBegins(event assemblyai.SessionBegins) {
-	slog.Info("session begins")
-}
-
-func (h *realtimeHandler) SessionTerminated(event assemblyai.SessionTerminated) {
-	slog.Info("session terminated")
-}
-
-func (h *realtimeHandler) FinalTranscript(transcript assemblyai.FinalTranscript) {
-	fmt.Println(transcript.Text)
-}
-
-func (h *realtimeHandler) PartialTranscript(transcript assemblyai.PartialTranscript) {
-	fmt.Printf("%s\r", transcript.Text)
-}
-
-func (h *realtimeHandler) Error(err error) {
-	slog.Error("Something bad happened", "err", err)
-}
-
 func main() {
 	sigs := make(chan os.Signal, 1)
 
@@ -52,14 +30,30 @@ func main() {
 		framesPerBuffer = 3_200
 	)
 
-	var h realtimeHandler
+	transcriber := &assemblyai.RealTimeTranscriber{
+		OnSessionBegins: func(event assemblyai.SessionBegins) {
+			slog.Info("session begins")
+		},
+		OnSessionTerminated: func(event assemblyai.SessionTerminated) {
+			slog.Info("session terminated")
+		},
+		OnFinalTranscript: func(transcript assemblyai.FinalTranscript) {
+			fmt.Println(transcript.Text)
+		},
+		OnPartialTranscript: func(transcript assemblyai.PartialTranscript) {
+			fmt.Printf("%s\r", transcript.Text)
+		},
+		OnError: func(err error) {
+			slog.Error("Something bad happened", "err", err)
+		},
+	}
 
 	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
 
 	client := assemblyai.NewRealTimeClientWithOptions(
 		assemblyai.WithRealTimeAPIKey(apiKey),
 		assemblyai.WithRealTimeSampleRate(int(sampleRate)),
-		assemblyai.WithHandler(&h),
+		assemblyai.WithRealTimeTranscriber(transcriber),
 	)
 
 	ctx := context.Background()
