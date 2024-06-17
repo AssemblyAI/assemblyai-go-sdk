@@ -9,20 +9,20 @@ import (
 
 type recorder struct {
 	stream *portaudio.Stream
-	in     []int16
+	buffer []int16
 }
 
 func newRecorder(sampleRate int, framesPerBuffer int) (*recorder, error) {
-	in := make([]int16, framesPerBuffer)
+	buffer := make([]int16, framesPerBuffer)
 
-	stream, err := portaudio.OpenDefaultStream(1, 0, float64(sampleRate), framesPerBuffer, in)
+	stream, err := portaudio.OpenDefaultStream(1, 0, float64(sampleRate), framesPerBuffer, buffer)
 	if err != nil {
 		return nil, err
 	}
 
 	return &recorder{
 		stream: stream,
-		in:     in,
+		buffer: buffer,
 	}, nil
 }
 
@@ -31,12 +31,9 @@ func (r *recorder) Read() ([]byte, error) {
 		return nil, err
 	}
 
-	// Apple computers use little endian.
-	byteOrder := binary.LittleEndian
+	var buf bytes.Buffer
 
-	buf := new(bytes.Buffer)
-
-	if err := binary.Write(buf, byteOrder, r.in); err != nil {
+	if err := binary.Write(&buf, binary.LittleEndian, r.buffer); err != nil {
 		return nil, err
 	}
 
