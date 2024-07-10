@@ -20,3 +20,7 @@ linters-settings:
           - github.com/google
           - github.com/stretchr/testify
           - github.com/cenkalti/backoff
+  revive:
+    rules:
+      - name: var-naming
+        disabled: true
