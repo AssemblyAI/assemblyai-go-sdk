@@ -5,23 +5,44 @@ import (
 )
 
 const (
-	// LeMUR Default is best at complex reasoning. It offers more nuanced
-	// responses and improved contextual comprehension.
+	// Claude 3.5 Sonnet is the most intelligent model to date, outperforming
+	// Claude 3 Opus on a wide range of evaluations, with the speed and cost of
+	// Claude 3 Sonnet.
+	LeMURModelAnthropicClaude3_5_Sonnet LeMURModel = "anthropic/claude-3-5-sonnet"
+
+	// Claude 3 Opus is good at handling complex analysis, longer tasks with
+	// many steps, and higher-order math and coding tasks.
+	LeMURModelAnthropicClaude3_Opus LeMURModel = "anthropic/claude-3-opus"
+
+	// Claude 3 Haiku is the fastest model that can execute lightweight actions.
+	LeMURModelAnthropicClaude3_Haiku LeMURModel = "anthropic/claude-3-haiku"
+
+	// Claude 3 Sonnet is a legacy model with a balanced combination of
+	// performance and speed for efficient, high-throughput tasks.
+	LeMURModelAnthropicClaude3_Sonnet LeMURModel = "anthropic/claude-3-sonnet"
+
+	// Claude 2.1 is a legacy model similar to Claude 2.0. The key difference is
+	// that it minimizes model hallucination and system prompts, has a larger
+	// context window, and performs better in citations.
+	LeMURModelAnthropicClaude2_1 LeMURModel = "anthropic/claude-2-1"
+
+	// Claude 2.0 is a legacy model that has good complex reasoning. It offers
+	// more nuanced responses and improved contextual comprehension.
+	LeMURModelAnthropicClaude2 LeMURModel = "anthropic/claude-2"
+
+	// Legacy model. The same as [LeMURModelAnthropicClaude2].
 	LeMURModelDefault LeMURModel = "default"
 
-	// LeMUR Basic is a simplified model optimized for speed and cost. LeMUR
-	// Basic can complete requests up to 20% faster than Default.
+	// Claude Instant is a legacy model that is optimized for speed and cost.
+	// Claude Instant can complete requests up to 20% faster than Claude 2.0.
+	LeMURModelAnthropicClaudeInstant1_2 LeMURModel = "anthropic/claude-instant-1-2"
+
+	// Legacy model. The same as [LeMURModelAnthropicClaudeInstant1_2].
 	LeMURModelBasic LeMURModel = "basic"
 
-	// Claude 2.1 is similar to Default, with key improvements: it minimizes
-	// model hallucination and system prompts, has a larger context window, and
-	// performs better in citations.
+	// Mistral 7B is an open source model that works well for summarization and
+	// answering questions.
 	LeMURModelAssemblyAIMistral7B LeMURModel = "assemblyai/mistral-7b"
-
-	// LeMUR Mistral 7B is an LLM self-hosted by AssemblyAI. It's the fastest
-	// and cheapest of the LLM options. We recommend it for use cases like basic
-	// summaries and factual Q&A.
-	LeMURModelAnthropicClaude2_1 LeMURModel = "anthropic/claude-2-1"
 )
 
 // LeMURService groups the operations related to LeMUR.

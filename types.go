@@ -136,7 +136,6 @@ type LeMURBaseParams struct {
 	Context interface{} `json:"context,omitempty"`
 
 	// The model that is used for the final prompt after compression is performed.
-	// Defaults to "default".
 	FinalModel LeMURModel `json:"final_model,omitempty"`
 
 	// Custom formatted transcript data. Maximum size is the context limit of the selected model, which defaults to 100000.
@@ -306,6 +305,11 @@ type RealtimeTemporaryTokenResponse struct {
 
 // Controls the filetype of the audio created by redact_pii_audio. Currently supports mp3 (default) and wav. See [PII redaction](https://www.assemblyai.com/docs/models/pii-redaction) for more details.
 type RedactPIIAudioQuality string
+
+// The notification when the redacted audio is ready.
+type RedactedAudioNotification struct {
+	RedactedAudioResponse
+}
 
 type RedactedAudioResponse struct {
 	// The URL of the redacted audio file
@@ -580,13 +584,15 @@ type Transcript struct {
 	// Whether webhook authentication details were provided
 	WebhookAuth *bool `json:"webhook_auth,omitempty"`
 
-	// The header name which should be sent back with webhook calls
+	// The header name to be sent with the transcript completed or failed webhook requests
 	WebhookAuthHeaderName *string `json:"webhook_auth_header_name,omitempty"`
 
-	// The status code we received from your server when delivering your webhook, if a webhook URL was provided
+	// The status code we received from your server when delivering the transcript completed or failed webhook request, if a webhook URL was provided
 	WebhookStatusCode *int64 `json:"webhook_status_code,omitempty"`
 
-	// The URL to which we send webhooks upon transcription completion
+	// The URL to which we send webhook requests.
+	// We sends two different types of webhook requests.
+	// One request when a transcript is completed or failed, and one request when the redacted audio is ready if redact_pii_audio is enabled.
 	WebhookURL *string `json:"webhook_url,omitempty"`
 
 	// The list of custom vocabulary to boost transcription probability for
@@ -737,13 +743,13 @@ type TranscriptOptionalParams struct {
 	// The list of custom topics
 	Topics []string `json:"topics,omitempty"`
 
-	// The header name which should be sent back with webhook calls
+	// The header name to be sent with the transcript completed or failed webhook requests
 	WebhookAuthHeaderName *string `json:"webhook_auth_header_name,omitempty"`
 
-	// Specify a header name and value to send back with a webhook call for added security
+	// The header value to send back with the transcript completed or failed webhook requests for added security
 	WebhookAuthHeaderValue *string `json:"webhook_auth_header_value,omitempty"`
 
-	// The URL to which AssemblyAI send webhooks upon transcription completion
+	// The URL to which we send webhook requests. We sends two different types of webhook requests. One request when a transcript is completed or failed, and one request when the redacted audio is ready if redact_pii_audio is enabled.
 	WebhookURL *string `json:"webhook_url,omitempty"`
 
 	// The list of custom vocabulary to boost transcription probability for
@@ -822,6 +828,9 @@ type TranscriptUtterance struct {
 	// The words in the utterance.
 	Words []TranscriptWord `json:"words,omitempty"`
 }
+
+// The notifications sent to the webhook URL.
+type TranscriptWebhookNotification struct{}
 
 type TranscriptWord struct {
 	Confidence *float64 `json:"confidence,omitempty"`
