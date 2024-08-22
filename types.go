@@ -502,6 +502,14 @@ type Transcript struct {
 	// The default value is 'en_us'.
 	LanguageCode TranscriptLanguageCode `json:"language_code,omitempty"`
 
+	// The confidence score for the detected language, between 0.0 (low confidence) and 1.0 (high confidence)
+	LanguageConfidence *float64 `json:"language_confidence,omitempty"`
+
+	// The confidence threshold for the automatically detected language.
+	// An error will be returned if the language confidence is below this threshold.
+	// Defaults to 0.
+	LanguageConfidenceThreshold *float64 `json:"language_confidence_threshold,omitempty"`
+
 	// Whether [Automatic language detection](https://www.assemblyai.com/docs/models/speech-recognition#automatic-language-detection) is enabled, either true or false
 	LanguageDetection *bool `json:"language_detection,omitempty"`
 
@@ -603,7 +611,7 @@ type Transcript struct {
 	Words []TranscriptWord `json:"words,omitempty"`
 }
 
-// The word boost parameter value
+// How much to boost specified words
 type TranscriptBoostParam string
 
 // Object containing words or phrases to replace, and the word or phrase to replace with
@@ -657,7 +665,7 @@ type TranscriptOptionalParams struct {
 	// Enable Key Phrases, either true or false
 	AutoHighlights *bool `json:"auto_highlights,omitempty"`
 
-	// The word boost parameter value
+	// How much to boost specified words
 	BoostParam TranscriptBoostParam `json:"boost_param,omitempty"`
 
 	// Enable [Content Moderation](https://www.assemblyai.com/docs/models/content-moderation), can be true or false
@@ -694,6 +702,11 @@ type TranscriptOptionalParams struct {
 	// The default value is 'en_us'.
 	LanguageCode TranscriptLanguageCode `json:"language_code,omitempty"`
 
+	// The confidence threshold for the automatically detected language.
+	// An error will be returned if the language confidence is below this threshold.
+	// Defaults to 0.
+	LanguageConfidenceThreshold *float64 `json:"language_confidence_threshold,omitempty"`
+
 	// Enable [Automatic language detection](https://www.assemblyai.com/docs/models/speech-recognition#automatic-language-detection), either true or false.
 	LanguageDetection *bool `json:"language_detection,omitempty"`
 
@@ -724,7 +737,7 @@ type TranscriptOptionalParams struct {
 	// Tells the speaker label model how many speakers it should attempt to identify, up to 10. See [Speaker diarization](https://www.assemblyai.com/docs/models/speaker-diarization) for more details.
 	SpeakersExpected *int64 `json:"speakers_expected,omitempty"`
 
-	// The speech model to use for the transcription. When `null`, the default model is used.
+	// The speech model to use for the transcription. When `null`, the "best" model is used.
 	SpeechModel SpeechModel `json:"speech_model,omitempty"`
 
 	// Reject audio files that contain less than this fraction of speech.
