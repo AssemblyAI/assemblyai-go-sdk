@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"os"
 )
 
 const (
-	version              = "1.8.0"
+	version              = "1.7.0"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
 )
@@ -137,23 +138,46 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body io.Re
 	return req, err
 }
 
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) do(req *http.Request, v interface{}) error {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		var apierr APIError
+	contentType := resp.Header.Get("Content-Type")
 
-		if err := json.NewDecoder(resp.Body).Decode(&apierr); err != nil {
-			return nil, err
+	mimeType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return err
+	}
+
+	isJSONResponse := mimeType == "application/json"
+	isAPIError := resp.StatusCode < 200 || resp.StatusCode >= 400
+
+	if isAPIError {
+		var buf bytes.Buffer
+
+		_, err := io.Copy(&buf, resp.Body)
+		if err != nil {
+			return err
 		}
 
-		apierr.Status = resp.StatusCode
+		var apierr APIError
 
-		return nil, apierr
+		if isJSONResponse {
+			if err := json.Unmarshal(buf.Bytes(), &apierr); err != nil {
+				return err
+			}
+		}
+
+		// Reset response body so that clients can read it again.
+		resp.Body = io.NopCloser(bytes.NewBuffer(buf.Bytes()))
+
+		apierr.Status = resp.StatusCode
+		apierr.Response = resp
+
+		return apierr
 	}
 
 	if v != nil {
@@ -161,9 +185,11 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		case *[]byte:
 			*val, err = io.ReadAll(resp.Body)
 		default:
-			err = json.NewDecoder(resp.Body).Decode(v)
+			if isJSONResponse {
+				err = json.NewDecoder(resp.Body).Decode(v)
+			}
 		}
 	}
 
-	return resp, err
+	return err
 }
