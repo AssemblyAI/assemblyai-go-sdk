@@ -23,7 +23,7 @@ func (c *Client) Upload(ctx context.Context, data io.Reader) (string, error) {
 		UploadURL string `json:"upload_url"`
 	}
 
-	if _, err := c.do(req, &result); err != nil {
+	if err := c.do(req, &result); err != nil {
 		return "", err
 	}
 

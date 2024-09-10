@@ -61,7 +61,7 @@ func (s *LeMURService) Question(ctx context.Context, params LeMURQuestionAnswerP
 		return LeMURQuestionAnswerResponse{}, err
 	}
 
-	if _, err := s.client.do(req, &response); err != nil {
+	if err := s.client.do(req, &response); err != nil {
 		return LeMURQuestionAnswerResponse{}, err
 	}
 
@@ -79,7 +79,7 @@ func (s *LeMURService) Summarize(ctx context.Context, params LeMURSummaryParams)
 
 	var response LeMURSummaryResponse
 
-	if _, err := s.client.do(req, &response); err != nil {
+	if err := s.client.do(req, &response); err != nil {
 		return LeMURSummaryResponse{}, err
 	}
 
@@ -97,7 +97,7 @@ func (s *LeMURService) ActionItems(ctx context.Context, params LeMURActionItemsP
 
 	var response LeMURActionItemsResponse
 
-	if _, err := s.client.do(req, &response); err != nil {
+	if err := s.client.do(req, &response); err != nil {
 		return LeMURActionItemsResponse{}, err
 	}
 
@@ -115,7 +115,7 @@ func (s *LeMURService) Task(ctx context.Context, params LeMURTaskParams) (LeMURT
 
 	var response LeMURTaskResponse
 
-	if _, err := s.client.do(req, &response); err != nil {
+	if err := s.client.do(req, &response); err != nil {
 		return LeMURTaskResponse{}, err
 	}
 
@@ -130,7 +130,7 @@ func (s *LeMURService) PurgeRequestData(ctx context.Context, requestID string) (
 
 	var response PurgeLeMURRequestDataResponse
 
-	if _, err := s.client.do(req, &response); err != nil {
+	if err := s.client.do(req, &response); err != nil {
 		return PurgeLeMURRequestDataResponse{}, err
 	}
 
@@ -144,7 +144,7 @@ func (s *LeMURService) GetResponseData(ctx context.Context, requestID string, re
 		return err
 	}
 
-	if _, err := s.client.do(req, response); err != nil {
+	if err := s.client.do(req, response); err != nil {
 		return err
 	}
 

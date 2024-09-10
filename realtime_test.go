@@ -397,6 +397,7 @@ func TestRealTime_TemporaryToken(t *testing.T) {
 		ctx := r.Context()
 
 		if r.URL.Path == "/v2/realtime/token" {
+			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintln(w, `{"token":"temp-token"}`)
 			return
 		}
