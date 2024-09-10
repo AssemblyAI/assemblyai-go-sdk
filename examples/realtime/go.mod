@@ -1,4 +1,4 @@
-module github.com/AssemblyAI/DeepLearning/assemblyai/developer_tools/go/examples/realtime
+module github.com/AssemblyAI/assemblyai-go-sdk/examples/realtime
 
 go 1.21
 

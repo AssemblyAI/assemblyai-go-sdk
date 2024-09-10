@@ -542,11 +542,9 @@ func (svc *RealTimeService) CreateTemporaryToken(ctx context.Context, expiresIn 
 	}
 
 	var tokenResponse RealtimeTemporaryTokenResponse
-	resp, err := svc.client.do(req, &tokenResponse)
-	if err != nil {
+	if err := svc.client.do(req, &tokenResponse); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	return &tokenResponse, nil
 }

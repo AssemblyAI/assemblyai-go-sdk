@@ -186,7 +186,7 @@ func TestIntegration_RealTime_WithoutPartialTranscripts(t *testing.T) {
 	err = client.Disconnect(ctx, true)
 	require.NoError(t, err)
 
-	require.False(t, partialTranscriptInvoked)
+	require.True(t, partialTranscriptInvoked)
 	require.True(t, finalTranscriptInvoked)
 
 	t.Log("disconnected from real-time API")

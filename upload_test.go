@@ -25,6 +25,7 @@ func TestUpload(t *testing.T) {
 
 		require.Equal(t, "data", string(b))
 
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"upload_url\": %q}", fakeAudioURL)
 	})
 
