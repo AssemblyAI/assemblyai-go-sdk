@@ -21,6 +21,10 @@ var (
 	// ErrDisconnected is returned when attempting to write to a disconnected
 	// client.
 	ErrDisconnected = errors.New("client is disconnected")
+
+	// ErrConnectionNotFound is returned when attempting to disconnect a
+	// nil connection
+	ErrConnectionNotFound = errors.New("client connection does not exist")
 )
 
 type MessageType string
@@ -481,6 +485,10 @@ func (c *RealTimeClient) queryFromOptions() string {
 // Disconnect sends the terminate_session message and waits for the server to
 // send a SessionTerminated message before closing the connection.
 func (c *RealTimeClient) Disconnect(ctx context.Context, waitForSessionTermination bool) error {
+	if c.conn == nil {
+		return ErrConnectionNotFound
+	}
+
 	terminate := TerminateSession{TerminateSession: true}
 
 	if err := wsjson.Write(ctx, c.conn, terminate); err != nil {
