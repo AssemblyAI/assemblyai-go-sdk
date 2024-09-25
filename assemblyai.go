@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	version              = "1.8.0"
+	version              = "1.8.1"
 	defaultBaseURLScheme = "https"
 	defaultBaseURLHost   = "api.assemblyai.com"
 )
