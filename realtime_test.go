@@ -168,10 +168,10 @@ func TestRealTime_ConnectFailsDisconnect(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
-	var err error
 	// try to connect, note error is returned, but ignore it and proceed to Disconnect
-	err = client.Connect(ctx)
-	err = client.Disconnect(ctx, true)
+	_ = client.Connect(ctx)
+
+	err := client.Disconnect(ctx, true)
 	require.Errorf(t, err, "client connection does not exist")
 }
 
