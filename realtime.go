@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"sync"
 
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 )
 
 var (
@@ -550,11 +550,9 @@ func (svc *RealTimeService) CreateTemporaryToken(ctx context.Context, expiresIn 
 	}
 
 	var tokenResponse RealtimeTemporaryTokenResponse
-	resp, err := svc.client.do(req, &tokenResponse)
-	if err != nil {
+	if err := svc.client.do(req, &tokenResponse); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	return &tokenResponse, nil
 }

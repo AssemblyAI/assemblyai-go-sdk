@@ -17,15 +17,17 @@ A Go client library for accessing [AssemblyAI](https://assemblyai.com).
 ## Overview
 
 - [AssemblyAI Go SDK](#assemblyai-go-sdk)
-  - [Overview](#overview)
-  - [Documentation](#documentation)
-  - [Quickstart](#quickstart)
-    - [Installation](#installation)
-    - [Examples](#examples)
-      - [Core Transcription](#core-transcription)
-      - [Audio Intelligence](#audio-intelligence)
-      - [Real-Time Transcription](#real-time-transcription)
-  - [Playgrounds](#playgrounds)
+    - [Overview](#overview)
+    - [Documentation](#documentation)
+    - [Quickstart](#quickstart)
+        - [Installation](#installation)
+        - [Examples](#examples)
+            - [Core Transcription](#core-transcription)
+            - [Audio Intelligence](#audio-intelligence)
+            - [Real-Time Transcription](#real-time-transcription)
+    - [Playgrounds](#playgrounds)
+    - [Tips and tricks](#tips-and-tricks)
+        - [Inspect API errors](#inspect-api-errors)
 
 ## Documentation
 
@@ -54,28 +56,28 @@ Before you begin, you need to have your API key. If you don't have one yet, [**s
 package main
 
 import (
-	"context"
-	"log"
-	"os"
+    "context"
+    "log"
+    "os"
 
-	"github.com/AssemblyAI/assemblyai-go-sdk"
+    "github.com/AssemblyAI/assemblyai-go-sdk"
 )
 
 func main() {
-	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+    apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
 
-	ctx := context.Background()
+    ctx := context.Background()
 
-	audioURL := "https://example.org/audio.mp3"
+    audioURL := "https://example.org/audio.mp3"
 
-	client := assemblyai.NewClient(apiKey)
+    client := assemblyai.NewClient(apiKey)
 
-	transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, nil)
-	if err != nil {
-		log.Fatal("Something bad happened:", err)
-	}
+    transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, nil)
+    if err != nil {
+        log.Fatal("Something bad happened:", err)
+    }
 
-	log.Println(*transcript.Text)
+    log.Println(*transcript.Text)
 }
 ```
 
@@ -87,32 +89,32 @@ func main() {
 package main
 
 import (
-	"context"
-	"log"
-	"os"
+    "context"
+    "log"
+    "os"
 
-	"github.com/AssemblyAI/assemblyai-go-sdk"
+    "github.com/AssemblyAI/assemblyai-go-sdk"
 )
 
 func main() {
-	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+    apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
 
-	ctx := context.Background()
+    ctx := context.Background()
 
-	client := assemblyai.NewClient(apiKey)
+    client := assemblyai.NewClient(apiKey)
 
-	f, err := os.Open("./my-local-audio-file.wav")
-	if err != nil {
-		log.Fatal("Couldn't open audio file:", err)
-	}
-	defer f.Close()
+    f, err := os.Open("./my-local-audio-file.wav")
+    if err != nil {
+        log.Fatal("Couldn't open audio file:", err)
+    }
+    defer f.Close()
 
-	transcript, err := client.Transcripts.TranscribeFromReader(ctx, f, nil)
-	if err != nil {
-		log.Fatal("Something bad happened:", err)
-	}
+    transcript, err := client.Transcripts.TranscribeFromReader(ctx, f, nil)
+    if err != nil {
+        log.Fatal("Something bad happened:", err)
+    }
 
-	log.Println(*transcript.Text)
+    log.Println(*transcript.Text)
 }
 ```
 
@@ -127,36 +129,36 @@ func main() {
 package main
 
 import (
-	"context"
-	"log"
-	"os"
+    "context"
+    "log"
+    "os"
 
-	"github.com/AssemblyAI/assemblyai-go-sdk"
+    "github.com/AssemblyAI/assemblyai-go-sdk"
 )
 
 func main() {
-	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+    apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
 
-	ctx := context.Background()
+    ctx := context.Background()
 
-	audioURL := "https://example.org/audio.mp3"
+    audioURL := "https://example.org/audio.mp3"
 
-	client := assemblyai.NewClient(apiKey)
+    client := assemblyai.NewClient(apiKey)
 
-	opts := &assemblyai.TranscriptParams{
-		EntityDetection: assemblyai.Bool(true),
-	}
+    opts := &assemblyai.TranscriptParams{
+        EntityDetection: assemblyai.Bool(true),
+    }
 
-	transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, opts)
-	if err != nil {
-		log.Fatal("Something bad happened:", err)
-	}
+    transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, opts)
+    if err != nil {
+        log.Fatal("Something bad happened:", err)
+    }
 
-	for _, entity := range transcript.Entities {
-		log.Println(*entity.Text)
-		log.Println(entity.EntityType)
-		log.Printf("Timestamp: %v - %v", *entity.Start, *entity.End)
-	}
+    for _, entity := range transcript.Entities {
+        log.Println(*entity.Text)
+        log.Println(entity.EntityType)
+        log.Printf("Timestamp: %v - %v", *entity.Start, *entity.End)
+    }
 }
 ```
 
@@ -172,3 +174,22 @@ Visit one of our Playgrounds:
 
 - [LeMUR Playground](https://www.assemblyai.com/playground/v2/source)
 - [Transcription Playground](https://www.assemblyai.com/playground)
+
+## Tips and tricks
+
+### Inspect API errors
+
+If you receive an API error, you can inspect the HTTP response returned by the API for more details:
+
+```go
+transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioURL, nil)
+if err != nil {
+    var apierr aai.APIError
+    if errors.As(err, &apierr) {
+        // apierr.Response is the *http.Response from the API call.
+        fmt.Println(apierr.Response.StatusCode)
+    } else {
+        // err is not an API error.
+    }
+}
+```

@@ -16,7 +16,7 @@ linters-settings:
       main:
         allow:
           - $gostd
-          - nhooyr.io/websocket
+          - github.com/coder/websocket
           - github.com/google
           - github.com/stretchr/testify
           - github.com/cenkalti/backoff

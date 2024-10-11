@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,6 +22,10 @@ func setup() (*Client, *http.ServeMux, func()) {
 
 func writeFileResponse(t *testing.T, w http.ResponseWriter, filename string) {
 	t.Helper()
+
+	if filepath.Ext(filename) == ".json" {
+		w.Header().Set("Content-Type", "application/json")
+	}
 
 	b, err := os.ReadFile(filename)
 	require.NoError(t, err)

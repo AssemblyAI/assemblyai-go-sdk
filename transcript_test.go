@@ -285,6 +285,8 @@ func TestAPIError(t *testing.T) {
 	handler.HandleFunc("/v2/transcript", func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, "POST", r.Method)
 
+		w.Header().Set("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, `{"error": "something bad happened"}`)
 	})
@@ -293,10 +295,14 @@ func TestAPIError(t *testing.T) {
 
 	_, err := client.Transcripts.TranscribeFromURL(ctx, fakeAudioURL, nil)
 
-	require.IsType(t, APIError{}, err)
+	var apierr APIError
+	require.ErrorAs(t, err, &apierr)
 
-	require.Equal(t, APIError{
-		Status:  http.StatusBadRequest,
-		Message: "something bad happened",
-	}, err)
+	require.Equal(t, http.StatusBadRequest, apierr.Status)
+	require.Equal(t, "something bad happened", apierr.Message)
+
+	b, err := io.ReadAll(apierr.Response.Body)
+	require.NoError(t, err)
+
+	require.Equal(t, `{"error": "something bad happened"}`, string(b))
 }
