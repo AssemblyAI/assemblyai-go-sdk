@@ -76,6 +76,7 @@ type ContentSafetyLabelResult struct {
 // An array of results for the Content Moderation model, if it is enabled.
 // See [Content moderation](https://www.assemblyai.com/docs/models/content-moderation) for more information.
 type ContentSafetyLabelsResult struct {
+	// An array of results for the Content Moderation model
 	Results []ContentSafetyLabelResult `json:"results,omitempty"`
 
 	// A summary of the Content Moderation severity results for the entire audio file
@@ -275,12 +276,16 @@ type PageDetails struct {
 }
 
 type ParagraphsResponse struct {
+	// The duration of the audio file in seconds
 	AudioDuration *float64 `json:"audio_duration,omitempty"`
 
+	// The confidence score for the transcript
 	Confidence *float64 `json:"confidence,omitempty"`
 
+	// The unique identifier of your transcript
 	ID *string `json:"id,omitempty"`
 
+	// An array of paragraphs in the transcript
 	Paragraphs []TranscriptParagraph `json:"paragraphs,omitempty"`
 }
 
@@ -323,12 +328,16 @@ type RedactedAudioResponse struct {
 type RedactedAudioStatus string
 
 type SentencesResponse struct {
+	// The duration of the audio file in seconds
 	AudioDuration *float64 `json:"audio_duration,omitempty"`
 
+	// The confidence score for the transcript
 	Confidence *float64 `json:"confidence,omitempty"`
 
+	// The unique identifier for the transcript
 	ID *string `json:"id,omitempty"`
 
+	// An array of sentences in the transcript
 	Sentences []TranscriptSentence `json:"sentences,omitempty"`
 }
 
@@ -336,6 +345,9 @@ type Sentiment string
 
 // The result of the Sentiment Analysis model
 type SentimentAnalysisResult struct {
+	// The channel of this utterance. The left and right channels are channels 1 and 2. Additional channels increment the channel number sequentially.
+	Channel *string `json:"channel,omitempty"`
+
 	// The confidence score for the detected sentiment of the sentence, from 0 to 1
 	Confidence *float64 `json:"confidence,omitempty"`
 
@@ -402,6 +414,7 @@ type TopicDetectionModelResult struct {
 
 // The result of the topic detection model
 type TopicDetectionResult struct {
+	// An array of detected topics in the text
 	Labels []struct {
 		// The IAB taxonomical label for the label of the detected topic, where > denotes supertopic/subtopic relationship
 		Label *string `json:"label,omitempty"`
@@ -468,7 +481,7 @@ type Transcript struct {
 	// Transcribe Filler Words, like "umm", in your media file; can be true or false
 	Disfluencies *bool `json:"disfluencies,omitempty"`
 
-	// Whether [Dual channel transcription](https://www.assemblyai.com/docs/models/speech-recognition#dual-channel-transcription) was enabled in the transcription request, either true or false
+	// Deprecated: Whether [Dual channel transcription](https://www.assemblyai.com/docs/models/speech-recognition#dual-channel-transcription) was enabled in the transcription request, either true or false
 	DualChannel *bool `json:"dual_channel,omitempty"`
 
 	// An array of results for the Entity Detection model, if it is enabled.
@@ -507,7 +520,6 @@ type Transcript struct {
 
 	// The confidence threshold for the automatically detected language.
 	// An error will be returned if the language confidence is below this threshold.
-	// Defaults to 0.
 	LanguageConfidenceThreshold *float64 `json:"language_confidence_threshold,omitempty"`
 
 	// Whether [Automatic language detection](https://www.assemblyai.com/docs/models/speech-recognition#automatic-language-detection) is enabled, either true or false
@@ -515,6 +527,9 @@ type Transcript struct {
 
 	// Deprecated: The language model that was used for the transcript
 	LanguageModel *string `json:"language_model,omitempty"`
+
+	// Whether [Multichannel transcription](https://www.assemblyai.com/docs/models/speech-recognition#multichannel-transcription) was enabled in the transcription request, either true or false
+	Multichannel *bool `json:"multichannel,omitempty"`
 
 	// Whether Automatic Punctuation is enabled, either true or false
 	Punctuate *bool `json:"punctuate,omitempty"`
@@ -629,25 +644,33 @@ type TranscriptLanguageCode string
 
 // A list of transcripts. Transcripts are sorted from newest to oldest. The previous URL always points to a page with older transcripts.
 type TranscriptList struct {
+	// Details of the transcript page
 	PageDetails PageDetails `json:"page_details,omitempty"`
 
+	// An array of transcripts
 	Transcripts []TranscriptListItem `json:"transcripts,omitempty"`
 }
 
 type TranscriptListItem struct {
+	// The URL to the audio file
 	AudioURL *string `json:"audio_url,omitempty"`
 
+	// The date and time the transcript was completed
 	Completed *string `json:"completed,omitempty"`
 
+	// The date and time the transcript was created
 	Created *string `json:"created,omitempty"`
 
 	// Error message of why the transcript failed
 	Error *string `json:"error,omitempty"`
 
+	// The unique identifier for the transcript
 	ID *string `json:"id,omitempty"`
 
+	// The URL to retrieve the transcript
 	ResourceURL *string `json:"resource_url,omitempty"`
 
+	// The status of the transcript
 	Status TranscriptStatus `json:"status,omitempty"`
 }
 
@@ -683,7 +706,7 @@ type TranscriptOptionalParams struct {
 	// Transcribe Filler Words, like "umm", in your media file; can be true or false
 	Disfluencies *bool `json:"disfluencies,omitempty"`
 
-	// Enable [Dual Channel](https://www.assemblyai.com/docs/models/speech-recognition#dual-channel-transcription) transcription, can be true or false.
+	// Deprecated: Enable [Dual Channel](https://www.assemblyai.com/docs/models/speech-recognition#dual-channel-transcription) transcription, can be true or false.
 	DualChannel *bool `json:"dual_channel,omitempty"`
 
 	// Enable [Entity Detection](https://www.assemblyai.com/docs/models/entity-detection), can be true or false
@@ -709,6 +732,9 @@ type TranscriptOptionalParams struct {
 
 	// Enable [Automatic language detection](https://www.assemblyai.com/docs/models/speech-recognition#automatic-language-detection), either true or false.
 	LanguageDetection *bool `json:"language_detection,omitempty"`
+
+	// Enable [Multichannel](https://www.assemblyai.com/docs/models/speech-recognition#multichannel-transcription) transcription, can be true or false.
+	Multichannel *bool `json:"multichannel,omitempty"`
 
 	// Enable Automatic Punctuation, can be true or false
 	Punctuate *bool `json:"punctuate,omitempty"`
@@ -762,7 +788,9 @@ type TranscriptOptionalParams struct {
 	// The header value to send back with the transcript completed or failed webhook requests for added security
 	WebhookAuthHeaderValue *string `json:"webhook_auth_header_value,omitempty"`
 
-	// The URL to which we send webhook requests. We sends two different types of webhook requests. One request when a transcript is completed or failed, and one request when the redacted audio is ready if redact_pii_audio is enabled.
+	// The URL to which we send webhook requests.
+	// We sends two different types of webhook requests.
+	// One request when a transcript is completed or failed, and one request when the redacted audio is ready if redact_pii_audio is enabled.
 	WebhookURL *string `json:"webhook_url,omitempty"`
 
 	// The list of custom vocabulary to boost transcription probability for
@@ -770,17 +798,19 @@ type TranscriptOptionalParams struct {
 }
 
 type TranscriptParagraph struct {
+	// The confidence score for the transcript of this paragraph
 	Confidence *float64 `json:"confidence,omitempty"`
 
+	// The ending time, in milliseconds, of the paragraph
 	End *int64 `json:"end,omitempty"`
 
-	// The speaker of the sentence if [Speaker Diarization](https://www.assemblyai.com/docs/models/speaker-diarization) is enabled, else null
-	Speaker *string `json:"speaker,omitempty"`
-
+	// The starting time, in milliseconds, of the paragraph
 	Start *int64 `json:"start,omitempty"`
 
+	// The transcript of the paragraph
 	Text *string `json:"text,omitempty"`
 
+	// An array of words in the paragraph
 	Words []TranscriptWord `json:"words,omitempty"`
 }
 
@@ -805,17 +835,25 @@ type TranscriptReadyNotification struct {
 type TranscriptReadyStatus string
 
 type TranscriptSentence struct {
+	// The channel of the sentence. The left and right channels are channels 1 and 2. Additional channels increment the channel number sequentially.
+	Channel *string `json:"channel,omitempty"`
+
+	// The confidence score for the transcript of this sentence
 	Confidence *float64 `json:"confidence,omitempty"`
 
+	// The ending time, in milliseconds, for the sentence
 	End *int64 `json:"end,omitempty"`
 
 	// The speaker of the sentence if [Speaker Diarization](https://www.assemblyai.com/docs/models/speaker-diarization) is enabled, else null
 	Speaker *string `json:"speaker,omitempty"`
 
+	// The starting time, in milliseconds, for the sentence
 	Start *int64 `json:"start,omitempty"`
 
+	// The transcript of the sentence
 	Text *string `json:"text,omitempty"`
 
+	// An array of words in the sentence
 	Words []TranscriptWord `json:"words,omitempty"`
 }
 
@@ -823,6 +861,9 @@ type TranscriptSentence struct {
 type TranscriptStatus string
 
 type TranscriptUtterance struct {
+	// The channel of this utterance. The left and right channels are channels 1 and 2. Additional channels increment the channel number sequentially.
+	Channel *string `json:"channel,omitempty"`
+
 	// The confidence score for the transcript of this utterance
 	Confidence *float64 `json:"confidence,omitempty"`
 
@@ -846,15 +887,22 @@ type TranscriptUtterance struct {
 type TranscriptWebhookNotification struct{}
 
 type TranscriptWord struct {
+	// The channel of the word. The left and right channels are channels 1 and 2. Additional channels increment the channel number sequentially.
+	Channel *string `json:"channel,omitempty"`
+
+	// The confidence score for the transcript of this word
 	Confidence *float64 `json:"confidence,omitempty"`
 
+	// The ending time, in milliseconds, for the word
 	End *int64 `json:"end,omitempty"`
 
-	// The speaker of the sentence if [Speaker Diarization](https://www.assemblyai.com/docs/models/speaker-diarization) is enabled, else null
+	// The speaker of the word if [Speaker Diarization](https://www.assemblyai.com/docs/models/speaker-diarization) is enabled, else null
 	Speaker *string `json:"speaker,omitempty"`
 
+	// The starting time, in milliseconds, for the word
 	Start *int64 `json:"start,omitempty"`
 
+	// The text of the word
 	Text *string `json:"text,omitempty"`
 }
 

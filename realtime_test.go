@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 	"github.com/stretchr/testify/require"
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
 )
 
 const testTimeout = 5 * time.Second
@@ -152,7 +153,7 @@ func TestRealTime_Connect(t *testing.T) {
 func TestRealTime_ConnectFailsDisconnect(t *testing.T) {
 	t.Parallel()
 
-	// setup webhook server that fails to make a connection
+	// Set up a test server that fails to make a connection.
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		apiKey := r.Header.Get("Authorization")
 		require.Equal(t, "api-key", apiKey)
@@ -168,10 +169,10 @@ func TestRealTime_ConnectFailsDisconnect(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
-	// try to connect, note error is returned, but ignore it and proceed to Disconnect
+	var err error
+	// Attempt to connect, ignore the resulting error and then disconnect.
 	_ = client.Connect(ctx)
-
-	err := client.Disconnect(ctx, true)
+	err = client.Disconnect(ctx, true)
 	require.Errorf(t, err, "client connection does not exist")
 }
 
@@ -423,6 +424,7 @@ func TestRealTime_TemporaryToken(t *testing.T) {
 		ctx := r.Context()
 
 		if r.URL.Path == "/v2/realtime/token" {
+			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintln(w, `{"token":"temp-token"}`)
 			return
 		}
@@ -581,5 +583,57 @@ func TestRealTime_EnablePartialTranscriptsIfCallback(t *testing.T) {
 	require.NoError(t, err)
 
 	err = client.Disconnect(ctx, true)
+	require.NoError(t, err)
+}
+
+func TestRealtime_Regression_UnexpectedRSVBits(t *testing.T) {
+	path := "./testdata/gore-short.wav"
+
+	// Transcript
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
+
+	transcriber := &RealTimeTranscriber{
+		OnSessionBegins: func(event SessionBegins) {
+			t.Log("session started")
+		},
+		OnPartialTranscript: func(event PartialTranscript) {
+			t.Log(event.Text)
+		},
+		OnSessionTerminated: func(event SessionTerminated) {
+			t.Log("session terminated")
+		},
+	}
+
+	t.Parallel()
+
+	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+	if apiKey == "" {
+		t.Skip("ASSEMBLYAI_API_KEY not set")
+	}
+
+	client := NewRealTimeClientWithOptions(
+		WithRealTimeAPIKey(apiKey), WithRealTimeTranscriber(transcriber), WithRealTimeSampleRate(8000),
+	)
+
+	ctx := context.Background()
+
+	err = client.Connect(ctx)
+	require.NoError(t, err)
+
+	buf := make([]byte, framesPerBufferTelephone)
+
+	for {
+		_, err := f.Read(buf)
+		if err != nil {
+			break
+		}
+
+		err = client.Send(ctx, buf)
+		require.NoError(t, err)
+	}
+
+	err = client.Disconnect(ctx, false)
 	require.NoError(t, err)
 }

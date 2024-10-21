@@ -56,11 +56,9 @@ func (s *TranscriptService) SubmitFromURL(ctx context.Context, audioURL string, 
 		return Transcript{}, err
 	}
 
-	resp, err := s.client.do(req, &transcript)
-	if err != nil {
+	if err := s.client.do(req, &transcript); err != nil {
 		return Transcript{}, err
 	}
-	defer resp.Body.Close()
 
 	return transcript, nil
 }
@@ -86,11 +84,9 @@ func (s *TranscriptService) Delete(ctx context.Context, transcriptID string) (Tr
 
 	var transcript Transcript
 
-	resp, err := s.client.do(req, &transcript)
-	if err != nil {
+	if err := s.client.do(req, &transcript); err != nil {
 		return Transcript{}, err
 	}
-	defer resp.Body.Close()
 
 	return transcript, nil
 }
@@ -106,11 +102,9 @@ func (s *TranscriptService) Get(ctx context.Context, transcriptID string) (Trans
 
 	var transcript Transcript
 
-	resp, err := s.client.do(req, &transcript)
-	if err != nil {
+	if err := s.client.do(req, &transcript); err != nil {
 		return Transcript{}, err
 	}
-	defer resp.Body.Close()
 
 	return transcript, nil
 }
@@ -124,11 +118,9 @@ func (s *TranscriptService) GetSentences(ctx context.Context, transcriptID strin
 
 	var results SentencesResponse
 
-	resp, err := s.client.do(req, &results)
-	if err != nil {
+	if err := s.client.do(req, &results); err != nil {
 		return SentencesResponse{}, err
 	}
-	defer resp.Body.Close()
 
 	return results, nil
 }
@@ -142,11 +134,9 @@ func (s *TranscriptService) GetParagraphs(ctx context.Context, transcriptID stri
 
 	var results ParagraphsResponse
 
-	resp, err := s.client.do(req, &results)
-	if err != nil {
+	if err := s.client.do(req, &results); err != nil {
 		return ParagraphsResponse{}, err
 	}
-	defer resp.Body.Close()
 
 	return results, nil
 }
@@ -162,11 +152,9 @@ func (s *TranscriptService) GetRedactedAudio(ctx context.Context, transcriptID s
 
 	var audio RedactedAudioResponse
 
-	resp, err := s.client.do(req, &audio)
-	if err != nil {
+	if err := s.client.do(req, &audio); err != nil {
 		return RedactedAudioResponse{}, err
 	}
-	defer resp.Body.Close()
 
 	return audio, nil
 }
@@ -189,11 +177,9 @@ func (s *TranscriptService) GetSubtitles(ctx context.Context, transcriptID strin
 
 	var res []byte
 
-	resp, err := s.client.do(req, &res)
-	if err != nil {
+	if err := s.client.do(req, &res); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	return res, nil
 }
@@ -215,11 +201,9 @@ func (s *TranscriptService) List(ctx context.Context, options ListTranscriptPara
 
 	var results TranscriptList
 
-	resp, err := s.client.do(req, &results)
-	if err != nil {
+	if err := s.client.do(req, &results); err != nil {
 		return TranscriptList{}, err
 	}
-	defer resp.Body.Close()
 
 	return results, nil
 }
@@ -279,11 +263,9 @@ func (s *TranscriptService) WordSearch(ctx context.Context, transcriptID string,
 
 	var results WordSearchResponse
 
-	resp, err := s.client.do(req, &results)
-	if err != nil {
+	if err := s.client.do(req, &results); err != nil {
 		return WordSearchResponse{}, err
 	}
-	defer resp.Body.Close()
 
 	return results, nil
 }
