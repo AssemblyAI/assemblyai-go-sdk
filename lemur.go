@@ -24,21 +24,20 @@ const (
 	// Claude 2.1 is a legacy model similar to Claude 2.0. The key difference is
 	// that it minimizes model hallucination and system prompts, has a larger
 	// context window, and performs better in citations.
+	//
+	// Deprecated: Switch to Claude 3 by February 6th, 2025.
 	LeMURModelAnthropicClaude2_1 LeMURModel = "anthropic/claude-2-1"
 
 	// Claude 2.0 is a legacy model that has good complex reasoning. It offers
 	// more nuanced responses and improved contextual comprehension.
+	//
+	// Deprecated: Switch to Claude 3 by February 6th, 2025.
 	LeMURModelAnthropicClaude2 LeMURModel = "anthropic/claude-2"
 
 	// Legacy model. The same as [LeMURModelAnthropicClaude2].
+	//
+	// Deprecated: Switch to Claude 3 by February 6th, 2025.
 	LeMURModelDefault LeMURModel = "default"
-
-	// Claude Instant is a legacy model that is optimized for speed and cost.
-	// Claude Instant can complete requests up to 20% faster than Claude 2.0.
-	LeMURModelAnthropicClaudeInstant1_2 LeMURModel = "anthropic/claude-instant-1-2"
-
-	// Legacy model. The same as [LeMURModelAnthropicClaudeInstant1_2].
-	LeMURModelBasic LeMURModel = "basic"
 
 	// Mistral 7B is an open source model that works well for summarization and
 	// answering questions.

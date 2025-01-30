@@ -250,3 +250,23 @@ func TestIntegration_RealTime_WithExtraSessionInfo(t *testing.T) {
 
 	require.True(t, sessionInformationInvoked)
 }
+
+// https://github.com/AssemblyAI/assemblyai-go-sdk/issues/32
+func TestIntegration_TranscriptionError(t *testing.T) {
+	apiKey := os.Getenv("ASSEMBLYAI_API_KEY")
+	if apiKey == "" {
+		t.Skip("ASSEMBLYAI_API_KEY not set")
+	}
+
+	client := NewClient(apiKey)
+
+	ctx := context.Background()
+
+	transcript, err := client.Transcripts.TranscribeFromURL(ctx, "https://nonexisting.foo", nil)
+	// No error, because the transcript is returned with a 200 status code.
+	require.NoError(t, err)
+
+	// Transcription errors are reported in the transcript.Error field.
+	require.NotNil(t, transcript.Error)
+	require.NotEmpty(t, ToString(transcript.Error))
+}
